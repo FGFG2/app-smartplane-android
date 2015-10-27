@@ -54,6 +54,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.MeteoTask;
 import com.tobyrich.app.SmartPlane.util.Util;
@@ -88,6 +89,20 @@ public class FullscreenActivity extends Activity {
     private AudioManager audioManager;
     private SharedPreferences buttonConfig;  // cached button configuration
 
+    private DataDispatcher dataDispatcher;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        dataDispatcher.startAchievmentMonitoring();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        dataDispatcher.stopAchievmentMonitoring();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -112,6 +127,9 @@ public class FullscreenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        dataDispatcher = new DataDispatcher();
+
         setContentView(R.layout.activity_fullscreen);
 
         audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -183,8 +201,10 @@ public class FullscreenActivity extends Activity {
                     public void onClick(DialogInterface arg0, int arg1) {
                         //This resets all cached data from the app and breaks the connection.
                         //The app itself is only minimized, but not closed.
-                        int pid = android.os.Process.myPid();
-                        android.os.Process.killProcess(pid);
+                        FullscreenActivity.this.finish();
+                        // TODO: WHY WOULD ONE KILL THE APP PROCESS??
+                        //int pid = android.os.Process.myPid();
+                        //android.os.Process.killProcess(pid);
                     }
                 }).create().show();
     }

@@ -32,12 +32,16 @@ import android.media.MediaPlayer;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.tobyrich.app.SmartPlane.dispatcher.BluetoothValueCache;
+import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.Util;
 
 import java.lang.ref.WeakReference;
 import java.util.Timer;
 
+import de.greenrobot.event.EventBus;
 import lib.smartlink.BLEService;
 import lib.smartlink.BluetoothDevice;
 import lib.smartlink.BluetoothDisabledException;
@@ -45,8 +49,12 @@ import lib.smartlink.driver.BLEBatteryService;
 import lib.smartlink.driver.BLEDeviceInformationService;
 import lib.smartlink.driver.BLESmartplaneService;
 
-import static com.tobyrich.app.SmartPlane.BluetoothTasks.*;
-import static com.tobyrich.app.SmartPlane.UIChangers.*;
+import static com.tobyrich.app.SmartPlane.BluetoothTasks.ChargeTimerTask;
+import static com.tobyrich.app.SmartPlane.BluetoothTasks.SignalTimerTask;
+import static com.tobyrich.app.SmartPlane.UIChangers.BatteryLevelUIChanger;
+import static com.tobyrich.app.SmartPlane.UIChangers.ChargeStatusTextChanger;
+import static com.tobyrich.app.SmartPlane.UIChangers.SearchingStatusChanger;
+import static com.tobyrich.app.SmartPlane.UIChangers.SignalLevelUIChanger;
 
 /**
  * Abstraction Layer for the Bluetooth device
@@ -74,6 +82,8 @@ public class BluetoothDelegate
 
     private Activity activity;
 
+    private BluetoothValueCache bluetoothValueCache;
+
     /**
      * Create a BluetoothDelegate owned by <code>activity</code>
      *
@@ -82,6 +92,8 @@ public class BluetoothDelegate
     public BluetoothDelegate(Activity activity) {
         this.activity = activity;
         this.planeState = (PlaneState) activity.getApplicationContext();
+
+        bluetoothValueCache = new BluetoothValueCache();
 
         try {
             device = new BluetoothDevice(activity.getResources().openRawResource(R.raw.services),
@@ -104,8 +116,16 @@ public class BluetoothDelegate
      *              0 corresponds to no motor movement and 255 to max throttle
      */
     public void setMotor(short value) {
-        if (smartplaneService != null) {
-            smartplaneService.setMotor(value);
+        if (bluetoothValueCache.isMotorValueChange(value)) {
+            if (smartplaneService != null) {
+                smartplaneService.setMotor(value);
+
+                // Send event to inform data dispatcher
+                EventBus.getDefault().post(new MotorChangedEvent(value));
+            } else {
+                //TODO: DEBUG CODE --> REMOVE LATER
+                EventBus.getDefault().post(new MotorChangedEvent(value));
+            }
         }
     }
 
@@ -119,8 +139,16 @@ public class BluetoothDelegate
      *              0 corresponds to no motor movement and 255 to max throttle
      */
     public void setRudder(short value) {
-        if (smartplaneService != null) {
-            smartplaneService.setRudder(value);
+        if (bluetoothValueCache.isRudderValueChange(value)) {
+            if (smartplaneService != null) {
+                smartplaneService.setRudder(value);
+
+                // Send event to inform data dispatcher
+                EventBus.getDefault().post(new RudderChangedEvent(value));
+            } else {
+                //TODO: DEBUG CODE --> REMOVE LATER
+                EventBus.getDefault().post(new RudderChangedEvent(value));
+            }
         }
     }
 

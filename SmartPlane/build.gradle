@@ -20,11 +20,11 @@ android {
             assets.srcDirs = ['src/main/assets']
         }
     }
-    lintOptions { abortOnError false }
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:19.+'
+    compile 'com.android.support:support-v4:18.1.1'
+    compile 'de.greenrobot:eventbus:2.4.0'
     compile project(':indicator-library')
     compile files('libs/dd-plist.jar')
     compile files('libs/LibSmartlink.jar')
