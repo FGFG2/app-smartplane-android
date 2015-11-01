@@ -45,8 +45,8 @@ public class SendDataServiceTest {
     @Test
     public void testSendMotorDataInteger() throws Exception {
         // Given
-        Map<Integer, Integer> map = new LinkedHashMap<Integer, Integer>();
-        map.put(5, 5);
+        Map<Long, Short> map = new LinkedHashMap<Long, Short>();
+        map.put(5L, (short) 5);
 
         // When
         AchievementService service = retrofit.create(AchievementService.class);

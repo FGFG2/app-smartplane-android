@@ -1,14 +1,16 @@
 package com.tobyrich.app.SmartPlane.dispatcher.event;
 
+import com.google.common.base.Optional;
+
 public class RudderChangedEvent {
 
-    private short value;
+    private Optional<Short> value;
 
-    public RudderChangedEvent(short value) {
+    public RudderChangedEvent(Optional<Short> value) {
         this.value = value;
     }
 
-    public short getValue() {
+    public Optional<Short> getValue() {
         return value;
     }
 }

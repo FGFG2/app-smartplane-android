@@ -28,24 +28,24 @@ android {
         exclude 'META-INF/license.txt'
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/notice.txt'
-        exclude 'META-INF/services/com.fasterxml.jackson.core.ObjectCodec'
-        exclude 'META-INF/services/com.fasterxml.jackson.core.JsonFactory'
+        exclude 'META-INF/DEPENDENCIES'
     }
 }
 
 dependencies {
     compile 'com.android.support:support-v4:18.+'
     compile 'de.greenrobot:eventbus:2.4.0'
-
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
-
+    compile 'com.google.guava:guava:18.0'
+    compile 'org.roboguice:roboguice:3.+'
     compile project(':indicator-library')
     compile files('libs/dd-plist.jar')
     compile files('libs/LibSmartlink.jar')
     compile files('libs/firebase-client-jvm-1.0.16.jar')
 
     testCompile "org.robolectric:robolectric:3.0"
-    testCompile 'junit:junit:4.12'
+
+    provided 'org.roboguice:roboblender:3.+'
 }

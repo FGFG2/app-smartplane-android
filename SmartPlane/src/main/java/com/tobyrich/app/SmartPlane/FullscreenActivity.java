@@ -27,7 +27,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.tobyrich.app.SmartPlane;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -54,6 +53,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.MeteoTask;
@@ -61,6 +61,8 @@ import com.tobyrich.app.SmartPlane.util.Util;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import lib.smartlink.BluetoothDisabledException;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.ContentView;
 
 /**
  * Entry point for the Smartplane app
@@ -72,7 +74,8 @@ import lib.smartlink.BluetoothDisabledException;
  * @date 17 Jul 2014
  */
 
-public class FullscreenActivity extends Activity {
+@ContentView(R.layout.activity_fullscreen)
+public class FullscreenActivity extends RoboActivity {
     private static final String TAG = "FullscreenActivity";
     @SuppressWarnings("FieldCanBeLocal")
     private static final int NUM_SCREENS = 3;
@@ -89,6 +92,7 @@ public class FullscreenActivity extends Activity {
     private AudioManager audioManager;
     private SharedPreferences buttonConfig;  // cached button configuration
 
+    @Inject
     private DataDispatcher dataDispatcher;
 
     @Override
@@ -127,11 +131,6 @@ public class FullscreenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        dataDispatcher = new DataDispatcher();
-
-        setContentView(R.layout.activity_fullscreen);
-
         audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
         // Instantiate a ViewPager and a PagerAdapter

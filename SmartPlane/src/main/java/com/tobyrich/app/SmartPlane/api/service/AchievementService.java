@@ -15,5 +15,11 @@ public interface AchievementService {
     Call<List<Achievement>> getAllAchievements();
 
     @POST("api/SetMotor")
-    Call<String> setMotor(@Body Map<Integer, Integer> map);
+    Call<String> setMotor(@Body Map<Long, Short> map);
+
+    @POST("api/SetRuder")
+    Call<String> setRudder(@Body Map<Long, Short> map);
+
+    @POST("api/SetIsConnected")
+    Call<String> setIsConnected(@Body Map<Long, Boolean> map);
 }

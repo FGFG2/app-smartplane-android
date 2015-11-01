@@ -32,7 +32,9 @@ import android.media.MediaPlayer;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.common.base.Optional;
 import com.tobyrich.app.SmartPlane.dispatcher.BluetoothValueCache;
+import com.tobyrich.app.SmartPlane.dispatcher.event.ConnectionStatusChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
@@ -121,10 +123,10 @@ public class BluetoothDelegate
                 smartplaneService.setMotor(value);
 
                 // Send event to inform data dispatcher
-                EventBus.getDefault().post(new MotorChangedEvent(value));
+                EventBus.getDefault().post(new MotorChangedEvent(Optional.fromNullable(value)));
             } else {
                 //TODO: DEBUG CODE --> REMOVE LATER
-                EventBus.getDefault().post(new MotorChangedEvent(value));
+                EventBus.getDefault().post(new MotorChangedEvent(Optional.fromNullable(value)));
             }
         }
     }
@@ -144,10 +146,10 @@ public class BluetoothDelegate
                 smartplaneService.setRudder(value);
 
                 // Send event to inform data dispatcher
-                EventBus.getDefault().post(new RudderChangedEvent(value));
+                EventBus.getDefault().post(new RudderChangedEvent(Optional.fromNullable(value)));
             } else {
                 //TODO: DEBUG CODE --> REMOVE LATER
-                EventBus.getDefault().post(new RudderChangedEvent(value));
+                EventBus.getDefault().post(new RudderChangedEvent(Optional.fromNullable(value)));
             }
         }
     }
@@ -290,6 +292,8 @@ public class BluetoothDelegate
             batteryService.delegate = new WeakReference<BLEBatteryService.Delegate>(this);
         }
 
+        // Inform data dispatcher about connection status change
+        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.TRUE)));
     }
 
     /**
@@ -361,6 +365,9 @@ public class BluetoothDelegate
             }
         });
         Util.showSearching(activity, true);
+
+        // Inform data dispatcher about connection status change
+        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
     }
 
 }
