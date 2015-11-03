@@ -1,28 +1,31 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
-import android.util.Log;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
-import com.tobyrich.app.SmartPlane.api.model.Achievement;
+import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
 import com.tobyrich.app.SmartPlane.api.service.AchievementService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import retrofit.Call;
-import retrofit.GsonConverterFactory;
 import retrofit.Response;
-import retrofit.Retrofit;
-import retrofit.RxJavaCallAdapterFactory;
+import roboguice.RoboGuice;
+import roboguice.inject.RoboInjector;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -30,43 +33,132 @@ import static org.junit.Assert.assertTrue;
 @Config(constants = BuildConfig.class)
 public class SendDataServiceTest {
 
-    public static final String URL_ALL_ACHIEVEMENTS = "http://chaos-krauts.de/Achievment/";
-    private Retrofit retrofit;
+    @Inject
+    private SendDataService classUnderTest;
+    @Mock
+    private RetrofitServiceManager retrofitServiceManager;
+    @Mock
+    private AchievementService achievementService;
+    @Mock
+    private Call call;
 
     @Before
     public void setUp() throws Exception {
-        retrofit = new Retrofit.Builder()
-                .baseUrl(URL_ALL_ACHIEVEMENTS)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
+        // Create mock for private members of test
+        MockitoAnnotations.initMocks(this);
+
+        // Set up Mockito behavior
+        Mockito.when(retrofitServiceManager.getAchievmentService()).thenReturn(achievementService);
+        Mockito.when(achievementService.setMotor(Mockito.anyMap())).thenReturn(call);
+        Mockito.when(achievementService.setRudder(Mockito.anyMap())).thenReturn(call);
+        Mockito.when(achievementService.setIsConnected(Mockito.anyMap())).thenReturn(call);
+
+        // Override injector and perform injection
+        RoboGuice.overrideApplicationInjector(RuntimeEnvironment.application, new MyTestModule());
+        RoboInjector injector = RoboGuice.getInjector(RuntimeEnvironment.application);
+        injector.injectMembersWithoutViews(this);
+    }
+
+    @After
+    public void teardown() {
+        RoboGuice.Util.reset();
     }
 
     @Test
-    public void testSendMotorDataInteger() throws Exception {
+    public void testSendMotorDataSuccess() throws Exception {
         // Given
-        Map<Long, Short> map = new LinkedHashMap<Long, Short>();
-        map.put(5L, (short) 5);
+        Map<Long, Short> map = getLongShortMap();
+        Response response = Response.success(null);
+        Mockito.when(call.execute()).thenReturn(response);
 
         // When
-        AchievementService service = retrofit.create(AchievementService.class);
-        Call<?> call = service.setMotor(map);
-        Response<?> response = call.execute();
+        Map<Long, Short> result = classUnderTest.sendMotorData(map);
 
         // Then
-        assertTrue(response.isSuccess());
-        Log.wtf(this.getClass().getSimpleName(), "Got response with code: " + response.code());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testGetAllAchievements() throws Exception {
+    public void testSendMotorDataFail() throws Exception {
+        // Given
+        Map<Long, Short> map = getLongShortMap();
+        Response response = Response.error(404, null);
+        Mockito.when(call.execute()).thenReturn(response);
+
         // When
-        AchievementService service = retrofit.create(AchievementService.class);
-        Call<List<Achievement>> call = service.getAllAchievements();
-        List<Achievement> achievementList = call.execute().body();
+        Map<Long, Short> result = classUnderTest.sendMotorData(map);
 
         // Then
-        assertFalse(achievementList.isEmpty());
-        Log.wtf(this.getClass().getSimpleName(), achievementList.toString());
+        assertTrue(result.size() == 1);
+    }
+
+    @Test
+    public void testSendMotorDataException() throws Exception {
+        // Given
+        Map<Long, Short> map = getLongShortMap();
+        Response response = Response.error(404, null);
+        Mockito.when(call.execute()).thenThrow(new IOException("Test"));
+
+        // When
+        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+
+        // Then
+        assertTrue(result.size() == 1);
+    }
+
+    @Test
+    public void testSendMotorDataNull() throws Exception {
+        // Given
+        Map<Long, Short> map = getLongShortMap();
+        Mockito.when(call.execute()).thenReturn(null);
+
+        // When
+        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+
+        // Then
+        assertTrue(result.size() == 1);
+    }
+
+    @Test
+    public void testSendRudderData() throws Exception {
+        // Given
+        Map<Long, Short> map = getLongShortMap();
+        Response response = Response.success(null);
+        Mockito.when(call.execute()).thenReturn(response);
+
+        // When
+        Map<Long, Short> result = classUnderTest.sendRudderData(map);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSendIsConnectedData() throws Exception {
+        // Given
+        Map<Long, Boolean> map = new LinkedHashMap<>();
+        map.put(0L, Boolean.FALSE);
+        Response response = Response.success(null);
+        Mockito.when(call.execute()).thenReturn(response);
+
+        // When
+        Map<Long, Boolean> result = classUnderTest.sendIsConnectedData(map);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    private Map<Long, Short> getLongShortMap() {
+        Map<Long, Short> map = new LinkedHashMap<>();
+        map.put(0L, (short) 0);
+        return map;
+    }
+
+    private class MyTestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            // Replace injected class with mock
+            bind(RetrofitServiceManager.class).toInstance(retrofitServiceManager);
+        }
     }
 }

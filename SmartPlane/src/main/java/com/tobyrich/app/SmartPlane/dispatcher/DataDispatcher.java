@@ -1,14 +1,12 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ConnectionStatusChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,47 +29,30 @@ public class DataDispatcher {
     /**
      * Starts listening on events and initializes value maps
      */
-    public void startAchievmentMonitoring() {
+    public void startAchievementMonitoring() {
         EventBus.getDefault().register(this);
-        motorMap = new LinkedHashMap<Long, Short>();
-        rudderMap = new LinkedHashMap<Long, Short>();
-        isConnectedMap = new LinkedHashMap<Long, Boolean>();
+        motorMap = new LinkedHashMap<>();
+        rudderMap = new LinkedHashMap<>();
+        isConnectedMap = new LinkedHashMap<>();
     }
 
     /**
      * Sends remaining data and stops listening on events
-     *
-     * TODO: REFACTOR EXCEPTION HANDLING
      */
-    public void stopAchievmentMonitoring() {
+    public void stopAchievementMonitoring() {
         // Do in background thread --> main thread not allowed to perform network operations
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... voids) {
                 if (!motorMap.isEmpty()) {
-                    try {
-                        sendDataService.sendMotorData(motorMap);
-                    } catch (IOException e) {
-                        // TODO: Persist data in database
-                        Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-                    }
+                    sendDataService.sendMotorData(motorMap);
                 }
                 if (!rudderMap.isEmpty()) {
-                    try {
-                        sendDataService.sendRudderData(rudderMap);
-                    } catch (IOException e) {
-                        // TODO: Persist data in database
-                        Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-                    }
+                    sendDataService.sendRudderData(rudderMap);
                 }
                 if (!isConnectedMap.isEmpty()) {
-                    try {
-                        sendDataService.sendIsConnectedData(isConnectedMap);
-                    } catch (IOException e) {
-                        // TODO: Persist data in database
-                        Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-                    }
+                    sendDataService.sendIsConnectedData(isConnectedMap);
                 }
                 return null;
             }
@@ -90,13 +71,7 @@ public class DataDispatcher {
             motorMap.put(getCurrentTime(), event.getValue().get());
         }
         if (motorMap.size() >= MOTOR_BUFFER_SIZE) {
-            try {
-                sendDataService.sendMotorData(motorMap);
-            } catch (IOException e) {
-                // TODO: Persist data in database
-                Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-            }
-            motorMap.clear();
+            motorMap = sendDataService.sendMotorData(motorMap);
         }
     }
 
@@ -111,13 +86,7 @@ public class DataDispatcher {
             rudderMap.put(getCurrentTime(), event.getValue().get());
         }
         if (rudderMap.size() >= RUDDER_BUFFER_SIZE) {
-            try {
-                sendDataService.sendRudderData(rudderMap);
-            } catch (IOException e) {
-                // TODO: Persist data in database
-                Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-            }
-            rudderMap.clear();
+            rudderMap = sendDataService.sendRudderData(rudderMap);
         }
     }
 
@@ -132,13 +101,7 @@ public class DataDispatcher {
             isConnectedMap.put(getCurrentTime(), event.isConnected().get());
         }
         if (isConnectedMap.size() >= IS_CONNECTED_BUFFER_SIZE) {
-            try {
-                sendDataService.sendIsConnectedData(isConnectedMap);
-            } catch (IOException e) {
-                // TODO: Persist data in database
-                Log.wtf(this.getClass().getSimpleName(), e.getMessage(), e);
-            }
-            isConnectedMap.clear();
+            isConnectedMap = sendDataService.sendIsConnectedData(isConnectedMap);
         }
     }
 

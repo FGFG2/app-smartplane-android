@@ -98,13 +98,13 @@ public class FullscreenActivity extends RoboActivity {
     @Override
     public void onStart() {
         super.onStart();
-        dataDispatcher.startAchievmentMonitoring();
+        dataDispatcher.startAchievementMonitoring();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        dataDispatcher.stopAchievmentMonitoring();
+        dataDispatcher.stopAchievementMonitoring();
     }
 
     @Override
