@@ -3,7 +3,7 @@ package com.tobyrich.app.SmartPlane.dispatcher;
 import android.os.AsyncTask;
 
 import com.google.inject.Inject;
-import com.tobyrich.app.SmartPlane.dispatcher.event.ValueChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.ValueChangedEvent;
 
 import java.util.Calendar;
 import java.util.LinkedHashMap;
@@ -52,10 +52,10 @@ public class DataDispatcher {
     }
 
     /**
-     * Receives MotorChangedEvent to add value to map and send data if buffer is full
+     * Receives ValueChangedEvent to add value to map and send data if buffer is full
      * Called in background thread to avoid blocking in main thread
      *
-     * @param event MotorChangedEvent
+     * @param event ValueChangedEvent
      */
     public void onEventBackgroundThread(ValueChangedEvent event) {
         if (event.getValue().isPresent()) {

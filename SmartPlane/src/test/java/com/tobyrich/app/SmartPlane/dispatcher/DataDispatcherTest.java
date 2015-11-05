@@ -4,9 +4,9 @@ import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
-import com.tobyrich.app.SmartPlane.dispatcher.event.ConnectionStatusChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.ConnectionStatusChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.MotorChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.RudderChangedEvent;
 
 import junit.framework.TestCase;
 

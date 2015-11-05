@@ -34,9 +34,9 @@ import android.widget.TextView;
 
 import com.google.common.base.Optional;
 import com.tobyrich.app.SmartPlane.dispatcher.BluetoothValueCache;
-import com.tobyrich.app.SmartPlane.dispatcher.event.ConnectionStatusChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.ConnectionStatusChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.MotorChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.RudderChangedEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.Util;
 
