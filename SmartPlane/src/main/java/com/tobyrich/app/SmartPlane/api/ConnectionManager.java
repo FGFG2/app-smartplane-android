@@ -10,8 +10,11 @@ import retrofit.RxJavaCallAdapterFactory;
 @Singleton
 public class ConnectionManager {
 
-    public static final String URL_ALL_ACHIEVEMENTS = "http://chaos-krauts.de/Achievment/";
+    public static final String URL_ALL_ACHIEVEMENTS = "http://chaos-krauts.de/Achievement/";
     private Optional<Retrofit> retrofitOptional = Optional.absent();
+
+    public ConnectionManager() {
+    }
 
     public Retrofit getRetrofitConnection() {
         if (!retrofitOptional.isPresent()) {

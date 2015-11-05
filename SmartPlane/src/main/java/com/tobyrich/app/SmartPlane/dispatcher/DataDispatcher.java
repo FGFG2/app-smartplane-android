@@ -15,9 +15,10 @@ import de.greenrobot.event.EventBus;
 
 public class DataDispatcher {
 
-    public static final int MOTOR_BUFFER_SIZE = 100;
+    public static final int MOTOR_BUFFER_SIZE = 10;
     public static final int RUDDER_BUFFER_SIZE = 100;
     public static final int IS_CONNECTED_BUFFER_SIZE = 10;
+    public static final int PRECISION = 1; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
 
     private Map<Long, Short> motorMap;
     private Map<Long, Short> rudderMap;
@@ -111,6 +112,18 @@ public class DataDispatcher {
      * @return current time
      */
     private long getCurrentTime() {
-        return Calendar.getInstance().getTimeInMillis() / 1000;
+        return Calendar.getInstance().getTimeInMillis() / PRECISION;
+    }
+
+    /* package */Map<Long, Short> getMotorMap() {
+        return motorMap;
+    }
+
+    /* package */Map<Long, Short> getRudderMap() {
+        return rudderMap;
+    }
+
+    /* package */Map<Long, Boolean> getIsConnectedMap() {
+        return isConnectedMap;
     }
 }

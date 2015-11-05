@@ -13,6 +13,9 @@ public class RetrofitServiceManager {
     @Inject
     private ConnectionManager connectionManager;
 
+    public RetrofitServiceManager() {
+    }
+
     public AchievementService getAchievmentService() {
         if (!achievementServiceOptional.isPresent()) {
             achievementServiceOptional = Optional.fromNullable(connectionManager.getRetrofitConnection().create(AchievementService.class));

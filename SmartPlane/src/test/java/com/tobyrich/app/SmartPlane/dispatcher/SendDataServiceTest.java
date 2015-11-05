@@ -96,7 +96,6 @@ public class SendDataServiceTest {
     public void testSendMotorDataException() throws Exception {
         // Given
         Map<Long, Short> map = getLongShortMap();
-        Response response = Response.error(404, null);
         Mockito.when(call.execute()).thenThrow(new IOException("Test"));
 
         // When
