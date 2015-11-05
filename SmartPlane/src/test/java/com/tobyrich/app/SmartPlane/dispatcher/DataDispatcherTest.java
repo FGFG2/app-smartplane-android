@@ -64,13 +64,13 @@ public class DataDispatcherTest extends TestCase {
 
         // Then
         assertTrue(classUnderTest.getMotorMap().size() == 1);
-        Mockito.verify(sendDataService, Mockito.never()).sendMotorData(Mockito.anyMap());
+        Mockito.verify(sendDataService, Mockito.never()).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
     }
 
     @Test
     public void testOnEventBackgroundThreadMotor() throws Exception {
         // Given
-        Mockito.when(sendDataService.sendMotorData(Mockito.anyMap())).thenReturn(Collections.emptyMap());
+        Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
         for (int i = 0; i < DataDispatcher.MOTOR_BUFFER_SIZE; i++) {
@@ -82,13 +82,13 @@ public class DataDispatcherTest extends TestCase {
 
         // Then
         assertEquals(Collections.emptyMap(), classUnderTest.getMotorMap());
-        Mockito.verify(sendDataService).sendMotorData(Mockito.anyMap());
+        Mockito.verify(sendDataService).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
     }
 
     @Test
     public void testOnEventBackgroundThreadRudder() throws Exception {
         // Given
-        Mockito.when(sendDataService.sendRudderData(Mockito.anyMap())).thenReturn(Collections.emptyMap());
+        Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
         for (int i = 0; i < DataDispatcher.RUDDER_BUFFER_SIZE; i++) {
@@ -100,13 +100,13 @@ public class DataDispatcherTest extends TestCase {
 
         // Then
         assertEquals(Collections.emptyMap(), classUnderTest.getRudderMap());
-        Mockito.verify(sendDataService).sendRudderData(Mockito.anyMap());
+        Mockito.verify(sendDataService).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
     }
 
     @Test
     public void testOnEventBackgroundThreadIsConnected() throws Exception {
         // Given
-        Mockito.when(sendDataService.sendIsConnectedData(Mockito.anyMap())).thenReturn(Collections.emptyMap());
+        Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
         for (int i = 0; i < DataDispatcher.IS_CONNECTED_BUFFER_SIZE; i++) {
@@ -118,7 +118,7 @@ public class DataDispatcherTest extends TestCase {
 
         // Then
         assertEquals(Collections.emptyMap(), classUnderTest.getIsConnectedMap());
-        Mockito.verify(sendDataService).sendIsConnectedData(Mockito.anyMap());
+        Mockito.verify(sendDataService).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
     }
 
     private class MyTestModule extends AbstractModule {

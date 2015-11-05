@@ -67,12 +67,12 @@ public class SendDataServiceTest {
     @Test
     public void testSendMotorDataSuccess() throws Exception {
         // Given
-        Map<Long, Short> map = getLongShortMap();
+        Map<Long, Object> map = getLongShortMap();
         Response response = Response.success(null);
         Mockito.when(call.execute()).thenReturn(response);
 
         // When
-        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.MOTOR);
 
         // Then
         assertTrue(result.isEmpty());
@@ -81,12 +81,12 @@ public class SendDataServiceTest {
     @Test
     public void testSendMotorDataFail() throws Exception {
         // Given
-        Map<Long, Short> map = getLongShortMap();
+        Map<Long, Object> map = getLongShortMap();
         Response response = Response.error(404, null);
         Mockito.when(call.execute()).thenReturn(response);
 
         // When
-        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.MOTOR);
 
         // Then
         assertTrue(result.size() == 1);
@@ -95,11 +95,11 @@ public class SendDataServiceTest {
     @Test
     public void testSendMotorDataException() throws Exception {
         // Given
-        Map<Long, Short> map = getLongShortMap();
+        Map<Long, Object> map = getLongShortMap();
         Mockito.when(call.execute()).thenThrow(new IOException("Test"));
 
         // When
-        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.MOTOR);
 
         // Then
         assertTrue(result.size() == 1);
@@ -108,11 +108,11 @@ public class SendDataServiceTest {
     @Test
     public void testSendMotorDataNull() throws Exception {
         // Given
-        Map<Long, Short> map = getLongShortMap();
+        Map<Long, Object> map = getLongShortMap();
         Mockito.when(call.execute()).thenReturn(null);
 
         // When
-        Map<Long, Short> result = classUnderTest.sendMotorData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.MOTOR);
 
         // Then
         assertTrue(result.size() == 1);
@@ -121,12 +121,12 @@ public class SendDataServiceTest {
     @Test
     public void testSendRudderData() throws Exception {
         // Given
-        Map<Long, Short> map = getLongShortMap();
+        Map<Long, Object> map = getLongShortMap();
         Response response = Response.success(null);
         Mockito.when(call.execute()).thenReturn(response);
 
         // When
-        Map<Long, Short> result = classUnderTest.sendRudderData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.RUDDER);
 
         // Then
         assertTrue(result.isEmpty());
@@ -135,20 +135,20 @@ public class SendDataServiceTest {
     @Test
     public void testSendIsConnectedData() throws Exception {
         // Given
-        Map<Long, Boolean> map = new LinkedHashMap<>();
+        Map<Long, Object> map = new LinkedHashMap<>();
         map.put(0L, Boolean.FALSE);
         Response response = Response.success(null);
         Mockito.when(call.execute()).thenReturn(response);
 
         // When
-        Map<Long, Boolean> result = classUnderTest.sendIsConnectedData(map);
+        Map<Long, Object> result = classUnderTest.sendData(map, ValueType.CONNECTION_STATE);
 
         // Then
         assertTrue(result.isEmpty());
     }
 
-    private Map<Long, Short> getLongShortMap() {
-        Map<Long, Short> map = new LinkedHashMap<>();
+    private Map<Long, Object> getLongShortMap() {
+        Map<Long, Object> map = new LinkedHashMap<>();
         map.put(0L, (short) 0);
         return map;
     }

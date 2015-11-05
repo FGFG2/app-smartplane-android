@@ -1,8 +1,9 @@
 package com.tobyrich.app.SmartPlane.dispatcher.event;
 
 import com.google.common.base.Optional;
+import com.tobyrich.app.SmartPlane.dispatcher.ValueType;
 
-public class MotorChangedEvent {
+public class MotorChangedEvent implements ValueChangedEvent {
 
     private Optional<Short> value;
 
@@ -10,7 +11,13 @@ public class MotorChangedEvent {
         this.value = value;
     }
 
+    @Override
     public Optional<Short> getValue() {
         return value;
+    }
+
+    @Override
+    public ValueType getType() {
+        return ValueType.MOTOR;
     }
 }

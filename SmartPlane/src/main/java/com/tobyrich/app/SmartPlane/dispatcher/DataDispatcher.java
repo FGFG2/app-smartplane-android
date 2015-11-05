@@ -3,9 +3,7 @@ package com.tobyrich.app.SmartPlane.dispatcher;
 import android.os.AsyncTask;
 
 import com.google.inject.Inject;
-import com.tobyrich.app.SmartPlane.dispatcher.event.ConnectionStatusChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.MotorChangedEvent;
-import com.tobyrich.app.SmartPlane.dispatcher.event.RudderChangedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.ValueChangedEvent;
 
 import java.util.Calendar;
 import java.util.LinkedHashMap;
@@ -20,9 +18,9 @@ public class DataDispatcher {
     public static final int IS_CONNECTED_BUFFER_SIZE = 10;
     public static final int PRECISION = 1; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
 
-    private Map<Long, Short> motorMap;
-    private Map<Long, Short> rudderMap;
-    private Map<Long, Boolean> isConnectedMap;
+    private Map<Long, Object> motorMap;
+    private Map<Long, Object> rudderMap;
+    private Map<Long, Object> isConnectedMap;
 
     @Inject
     private SendDataService sendDataService;
@@ -46,15 +44,7 @@ public class DataDispatcher {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                if (!motorMap.isEmpty()) {
-                    sendDataService.sendMotorData(motorMap);
-                }
-                if (!rudderMap.isEmpty()) {
-                    sendDataService.sendRudderData(rudderMap);
-                }
-                if (!isConnectedMap.isEmpty()) {
-                    sendDataService.sendIsConnectedData(isConnectedMap);
-                }
+                sendDataIfBufferOverflow(true);
                 return null;
             }
         }.execute();
@@ -67,42 +57,32 @@ public class DataDispatcher {
      *
      * @param event MotorChangedEvent
      */
-    public void onEventBackgroundThread(MotorChangedEvent event) {
+    public void onEventBackgroundThread(ValueChangedEvent event) {
         if (event.getValue().isPresent()) {
-            motorMap.put(getCurrentTime(), event.getValue().get());
+            switch (event.getType()) {
+                case MOTOR:
+                    motorMap.put(getCurrentTime(), event.getValue().get());
+                    break;
+                case RUDDER:
+                    rudderMap.put(getCurrentTime(), event.getValue().get());
+                    break;
+                case CONNECTION_STATE:
+                    isConnectedMap.put(getCurrentTime(), event.getValue().get());
+                    break;
+            }
         }
-        if (motorMap.size() >= MOTOR_BUFFER_SIZE) {
-            motorMap = sendDataService.sendMotorData(motorMap);
-        }
+        sendDataIfBufferOverflow(false);
     }
 
-    /**
-     * Receives RudderChangedEvents to add value to map and send data if buffer is full
-     * Called in background thread to avoid blocking in main thread
-     *
-     * @param event RudderChangedEvent
-     */
-    public void onEventBackgroundThread(RudderChangedEvent event) {
-        if (event.getValue().isPresent()) {
-            rudderMap.put(getCurrentTime(), event.getValue().get());
+    private void sendDataIfBufferOverflow(boolean ignoreBuffer) {
+        if (motorMap.size() >= MOTOR_BUFFER_SIZE || (ignoreBuffer && !motorMap.isEmpty())) {
+            motorMap = sendDataService.sendData(motorMap, ValueType.MOTOR);
         }
-        if (rudderMap.size() >= RUDDER_BUFFER_SIZE) {
-            rudderMap = sendDataService.sendRudderData(rudderMap);
+        if (rudderMap.size() >= RUDDER_BUFFER_SIZE || (ignoreBuffer && !rudderMap.isEmpty())) {
+            rudderMap = sendDataService.sendData(rudderMap, ValueType.RUDDER);
         }
-    }
-
-    /**
-     * Receives RudderChangedEvents to add value to map and send data if buffer is full
-     * Called in background thread to avoid blocking in main thread
-     *
-     * @param event RudderChangedEvent
-     */
-    public void onEventBackgroundThread(ConnectionStatusChangedEvent event) {
-        if (event.isConnected().isPresent()) {
-            isConnectedMap.put(getCurrentTime(), event.isConnected().get());
-        }
-        if (isConnectedMap.size() >= IS_CONNECTED_BUFFER_SIZE) {
-            isConnectedMap = sendDataService.sendIsConnectedData(isConnectedMap);
+        if (isConnectedMap.size() >= IS_CONNECTED_BUFFER_SIZE || (ignoreBuffer && !isConnectedMap.isEmpty())) {
+            isConnectedMap = sendDataService.sendData(isConnectedMap, ValueType.CONNECTION_STATE);
         }
     }
 
@@ -115,15 +95,15 @@ public class DataDispatcher {
         return Calendar.getInstance().getTimeInMillis() / PRECISION;
     }
 
-    /* package */Map<Long, Short> getMotorMap() {
+    /* package */Map<Long, Object> getMotorMap() {
         return motorMap;
     }
 
-    /* package */Map<Long, Short> getRudderMap() {
+    /* package */Map<Long, Object> getRudderMap() {
         return rudderMap;
     }
 
-    /* package */Map<Long, Boolean> getIsConnectedMap() {
+    /* package */Map<Long, Object> getIsConnectedMap() {
         return isConnectedMap;
     }
 }

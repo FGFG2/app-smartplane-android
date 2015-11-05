@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
+import com.tobyrich.app.SmartPlane.api.service.AchievementService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,35 +18,25 @@ public class SendDataService {
     @Inject
     private RetrofitServiceManager retrofitServiceManager;
 
-    public Map<Long, Short> sendMotorData(Map<Long, Short> map) {
+    public Map<Long, Object> sendData(Map<Long, Object> map, ValueType type) {
         try {
-            final Call<String> motorCall = retrofitServiceManager.getAchievmentService().setMotor(map);
-            final Optional<Response<String>> response = Optional.fromNullable(motorCall.execute());
+            final AchievementService achievementService = retrofitServiceManager.getAchievmentService();
+            Call<String> call = null;
+            switch (type) {
+                case MOTOR:
+                    call = achievementService.setMotor(map);
+                    break;
+                case RUDDER:
+                    call = achievementService.setRudder(map);
+                    break;
+                case CONNECTION_STATE:
+                    call = achievementService.setIsConnected(map);
+                    break;
+            }
+            final Optional<Response<String>> response = Optional.fromNullable(call.execute());
             return handleResponse(response, map);
         } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Could not send MotorData!", e);
-            return map;
-        }
-    }
-
-    public Map<Long, Short> sendRudderData(Map<Long, Short> map) {
-        try {
-            final Call<String> rudderCall = retrofitServiceManager.getAchievmentService().setRudder(map);
-            final Optional<Response<String>> response = Optional.fromNullable(rudderCall.execute());
-            return handleResponse(response, map);
-        } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Could not send RudderData!", e);
-            return map;
-        }
-    }
-
-    public Map<Long, Boolean> sendIsConnectedData(Map<Long, Boolean> map) {
-        try {
-            final Call<String> isConnectedCall = retrofitServiceManager.getAchievmentService().setIsConnected(map);
-            final Optional<Response<String>> response = Optional.fromNullable(isConnectedCall.execute());
-            return handleResponse(response, map);
-        } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Could not send connection state!", e);
+            Log.e(this.getClass().getSimpleName(), "Could not send data!", e);
             return map;
         }
     }

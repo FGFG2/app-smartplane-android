@@ -50,7 +50,7 @@ public class AchievementServiceTest extends TestCase {
     @Test
     public void integrationTestSendMotorData() throws Exception {
         // Given
-        final Map<Long, Short> map = new LinkedHashMap<>();
+        final Map<Long, Object> map = new LinkedHashMap<>();
         map.put(Calendar.getInstance().getTimeInMillis(), (short) 0);
 
         // When
@@ -65,7 +65,7 @@ public class AchievementServiceTest extends TestCase {
     @Test
     public void integrationTestSendRudderData() throws Exception {
         // Given
-        final Map<Long, Short> map = new LinkedHashMap<>();
+        final Map<Long, Object> map = new LinkedHashMap<>();
         map.put(Calendar.getInstance().getTimeInMillis(), (short) 0);
 
         // When
@@ -80,7 +80,7 @@ public class AchievementServiceTest extends TestCase {
     @Test
     public void integrationTestSendConnectionStatusData() throws Exception {
         // Given
-        final Map<Long, Boolean> map = new LinkedHashMap<>();
+        final Map<Long, Object> map = new LinkedHashMap<>();
         map.put(Calendar.getInstance().getTimeInMillis(), Boolean.TRUE);
         Thread.sleep(1);
         map.put(Calendar.getInstance().getTimeInMillis(), Boolean.FALSE);
