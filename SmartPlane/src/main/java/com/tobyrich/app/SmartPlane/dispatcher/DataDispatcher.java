@@ -3,6 +3,7 @@ package com.tobyrich.app.SmartPlane.dispatcher;
 import android.os.AsyncTask;
 
 import com.google.inject.Inject;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.ValueChangedEvent;
 
 import java.util.Calendar;
@@ -16,11 +17,11 @@ public class DataDispatcher {
     public static final int MOTOR_BUFFER_SIZE = 100;
     public static final int RUDDER_BUFFER_SIZE = 100;
     public static final int IS_CONNECTED_BUFFER_SIZE = 10;
-    public static final int PRECISION = 1; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
+    public static final int PRECISION = 100; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
 
-    private Map<Long, Object> motorMap;
-    private Map<Long, Object> rudderMap;
-    private Map<Long, Object> isConnectedMap;
+    private Map<Long, Short> motorMap;
+    private Map<Long, Short> rudderMap;
+    private Map<Long, Boolean> isConnectedMap;
 
     @Inject
     private SendDataService sendDataService;
@@ -57,21 +58,33 @@ public class DataDispatcher {
      *
      * @param event ValueChangedEvent
      */
-    public void onEventBackgroundThread(ValueChangedEvent event) {
+    public void onEventBackgroundThread(ValueChangedEvent<?> event) {
         if (event.getValue().isPresent()) {
             switch (event.getType()) {
                 case MOTOR:
-                    motorMap.put(getCurrentTime(), event.getValue().get());
+                    motorMap.put(getCurrentTime(), (Short) event.getValue().get());
                     break;
                 case RUDDER:
-                    rudderMap.put(getCurrentTime(), event.getValue().get());
+                    rudderMap.put(getCurrentTime(), (Short) event.getValue().get());
                     break;
                 case CONNECTION_STATE:
-                    isConnectedMap.put(getCurrentTime(), event.getValue().get());
+                    isConnectedMap.put(getCurrentTime(), (Boolean) event.getValue().get());
                     break;
             }
         }
         sendDataIfBufferOverflow(false);
+    }
+
+    public void onEventBackgroundThread(DataNotSendEvent event) {
+        // TODO: Persist data in database
+        switch (event.getType()) {
+            case MOTOR:
+                break;
+            case RUDDER:
+                break;
+            case CONNECTION_STATE:
+                break;
+        }
     }
 
     private void sendDataIfBufferOverflow(boolean ignoreBuffer) {
@@ -95,15 +108,15 @@ public class DataDispatcher {
         return Calendar.getInstance().getTimeInMillis() / PRECISION;
     }
 
-    /* package */Map<Long, Object> getMotorMap() {
+    /* package */Map<Long, Short> getMotorMap() {
         return motorMap;
     }
 
-    /* package */Map<Long, Object> getRudderMap() {
+    /* package */Map<Long, Short> getRudderMap() {
         return rudderMap;
     }
 
-    /* package */Map<Long, Object> getIsConnectedMap() {
+    /* package */Map<Long, Boolean> getIsConnectedMap() {
         return isConnectedMap;
     }
 }

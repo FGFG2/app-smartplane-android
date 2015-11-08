@@ -3,7 +3,7 @@ package com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged;
 import com.google.common.base.Optional;
 import com.tobyrich.app.SmartPlane.dispatcher.ValueType;
 
-public class ConnectionStatusChangedEvent implements ValueChangedEvent {
+public class ConnectionStatusChangedEvent implements ValueChangedEvent<Boolean> {
     private Optional<Boolean> isConnected;
 
     public ConnectionStatusChangedEvent(Optional<Boolean> isConnected) {

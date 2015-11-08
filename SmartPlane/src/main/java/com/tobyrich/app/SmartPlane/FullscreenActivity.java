@@ -52,14 +52,17 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.MeteoTask;
 import com.tobyrich.app.SmartPlane.util.Util;
 import com.viewpagerindicator.CirclePageIndicator;
 
+import de.greenrobot.event.EventBus;
 import lib.smartlink.BluetoothDisabledException;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.ContentView;
@@ -99,12 +102,14 @@ public class FullscreenActivity extends RoboActivity {
     public void onStart() {
         super.onStart();
         dataDispatcher.startAchievementMonitoring();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
-        super.onStop();
         dataDispatcher.stopAchievementMonitoring();
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -352,6 +357,10 @@ public class FullscreenActivity extends RoboActivity {
                 Const.DEFAULT_FLIGHT_ASSIST);
         flAssistSwitch.setChecked(enableFlAssist);
     }  // end initializeSettintsScreen()
+
+    public void onEventMainThread(DataNotSendEvent event) {
+        Toast.makeText(this, "No network connection present", Toast.LENGTH_LONG).show();
+    }
 
     /**
      * All three screens need to be alive at all times, so we don't try to update

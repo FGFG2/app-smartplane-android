@@ -6,10 +6,12 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
 import com.tobyrich.app.SmartPlane.api.service.AchievementService;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 
 import java.io.IOException;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Response;
 
@@ -18,7 +20,7 @@ public class SendDataService {
     @Inject
     private RetrofitServiceManager retrofitServiceManager;
 
-    public Map<Long, Object> sendData(Map<Long, Object> map, ValueType type) {
+    public <S, T> Map<S, T> sendData(Map<S, T> map, ValueType type) {
         try {
             final AchievementService achievementService = retrofitServiceManager.getAchievmentService();
             Call<String> call = null;
@@ -36,7 +38,8 @@ public class SendDataService {
             final Optional<Response<String>> response = Optional.fromNullable(call.execute());
             return handleResponse(response, map);
         } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Could not send data!", e);
+            Log.i(this.getClass().getSimpleName(), "Could not send data!", e);
+            EventBus.getDefault().post(new DataNotSendEvent(e.getMessage(), type));
             return map;
         }
     }

@@ -5,12 +5,12 @@ import android.util.Log;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
-import com.tobyrich.app.SmartPlane.api.ConnectionManager;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
 import com.tobyrich.app.SmartPlane.api.model.Achievement;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +45,11 @@ public class AchievementServiceTest extends TestCase {
 
         // Set up service
         achievementService = serviceManager.getAchievmentService();
+    }
+
+    @After
+    public void teardown() {
+        RoboGuice.Util.reset();
     }
 
     @Test
@@ -107,8 +112,6 @@ public class AchievementServiceTest extends TestCase {
     private class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {
-            // Replace injected class with mock
-            bind(ConnectionManager.class).toInstance(new ConnectionManager());
         }
     }
 }
