@@ -28,9 +28,11 @@ public class PersistDataService {
         SQLiteStatement preparedStatement = connection.compileStatement(databasehelper.getInsertStatementRudder());
         for (Map.Entry<Long, Short> entry : map.entrySet())
         {
-            preparedStatement.bindString(1, entry.getKey().toString());
-            preparedStatement.bindString(2, entry.getValue().toString());
-            preparedStatement.execute();
+            if (entry.getKey() != null && entry.getValue() != null) {
+                preparedStatement.bindString(1, entry.getKey().toString());
+                preparedStatement.bindString(2, entry.getValue().toString());
+                preparedStatement.execute();
+            }
         }
         preparedStatement.close();
         connection.close();
@@ -41,9 +43,11 @@ public class PersistDataService {
         SQLiteStatement preparedStatement = connection.compileStatement(databasehelper.getInsertStatementMotor());
         for (Map.Entry<Long, Short> entry : map.entrySet())
         {
-            preparedStatement.bindString(1, entry.getKey().toString());
-            preparedStatement.bindString(2, entry.getValue().toString());
-            preparedStatement.execute();
+            if (entry.getKey() != null && entry.getValue() != null) {
+                preparedStatement.bindString(1, entry.getKey().toString());
+                preparedStatement.bindString(2, entry.getValue().toString());
+                preparedStatement.execute();
+            }
         }
         preparedStatement.close();
         connection.close();
@@ -64,7 +68,7 @@ public class PersistDataService {
         );
         if (cursor.moveToFirst()){
             do {
-                resultMap.put(cursor.getLong(1), cursor.getShort(2));
+                resultMap.put(cursor.getLong(0), cursor.getShort(1));
             } while (cursor.moveToNext());
         }
 
@@ -81,8 +85,8 @@ public class PersistDataService {
         connection = databasehelper.getWritableDatabase();
         Map<Long, Short> resultMap = new LinkedHashMap<Long, Short>();
         Cursor cursor = connection.query(
-                databasehelper.getTableNameRudder(),        //Table name
-                databasehelper.getSelectRudderColumns(),    //Columns in result
+                databasehelper.getTableNameMotor(),        //Table name
+                databasehelper.getSelectMotorColumns(),    //Columns in result
                 null,                                       //no furhter selection
                 null,                                       //no further selection
                 null,                                       //no group by
@@ -91,12 +95,12 @@ public class PersistDataService {
         );
         if (cursor.moveToFirst()){
             do {
-                resultMap.put(cursor.getLong(1), cursor.getShort(2));
+                resultMap.put(cursor.getLong(0), cursor.getShort(1));
             } while (cursor.moveToNext());
         }
 
         //Delete data from table
-        SQLiteStatement preparedStatement = connection.compileStatement(databasehelper.getDeleteStatementRudder());
+        SQLiteStatement preparedStatement = connection.compileStatement(databasehelper.getDeleteStatementMotor());
         preparedStatement.execute();
         preparedStatement.close();
 
