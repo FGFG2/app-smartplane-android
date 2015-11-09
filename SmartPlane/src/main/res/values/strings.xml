@@ -87,5 +87,44 @@
     Plug in cable\n
     Check LED flashing
     </string>
-
+    <string name="version">1</string>
+    <string name="dbname">planedatadb</string>
+    <string-array name="create">
+        <item>
+            create table rudder(
+            id integer primary key autoincrement,
+            timestamp int not null,
+            rudder int not null
+            )
+        </item>
+        <item>
+            create table motor(
+            id integer  primary key autoincrement,
+            timestamp int not null,
+            motor int not null
+            )
+        </item>
+    </string-array>
+    <string name="insertRudderPrep">insert into rudder(timestamp,rudder) values(?,?)</string>
+    <string name="insertMotorPrep">insert into motor(timestamp,motor) values(?,?)</string>
+    <string name="tableNameRudder">rudder</string>
+    <string name="tableNameMotor">motor</string>
+    <string-array name="selectRudderColumns">
+        <item>
+            timestamp
+        </item>
+        <item>
+            rudder
+        </item>
+    </string-array>
+    <string-array name="selectMotorColumns">
+        <item>
+            timestamp
+        </item>
+        <item>
+            motor
+        </item>
+    </string-array>
+    <string name="deleteRudderPrep">delete from rudder</string>
+    <string name="deleteMotorPrep">delete from motor</string>
 </resources>
