@@ -113,8 +113,8 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(databasehelper.getSelectRudderColumns()).thenReturn(strings);
         Mockito.when(cursor.moveToFirst()).thenReturn(true);
 
-        Mockito.when(cursor.getLong(1)).thenReturn(12l).thenReturn(13l);
-        Mockito.when(cursor.getShort(2)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
+        Mockito.when(cursor.getLong(0)).thenReturn(12l).thenReturn(13l);
+        Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
         Mockito.when(cursor.moveToNext()).thenReturn(true).thenReturn(false);
 
         Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("delete ...");
@@ -138,8 +138,8 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(databasehelper.getSelectMotorColumns()).thenReturn(strings);
         Mockito.when(cursor.moveToFirst()).thenReturn(true);
 
-        Mockito.when(cursor.getLong(1)).thenReturn(12l).thenReturn(13l);
-        Mockito.when(cursor.getShort(2)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
+        Mockito.when(cursor.getLong(0)).thenReturn(12l).thenReturn(13l);
+        Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
         Mockito.when(cursor.moveToNext()).thenReturn(true).thenReturn(false);
 
         Mockito.when(databasehelper.getDeleteStatementMotor()).thenReturn("delete ...");
