@@ -57,6 +57,7 @@ import android.widget.Toast;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataSendEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
 import com.tobyrich.app.SmartPlane.util.MeteoTask;
 import com.tobyrich.app.SmartPlane.util.Util;
@@ -356,10 +357,14 @@ public class FullscreenActivity extends RoboActivity {
         boolean enableFlAssist = buttonConfig.getBoolean("flAssist",
                 Const.DEFAULT_FLIGHT_ASSIST);
         flAssistSwitch.setChecked(enableFlAssist);
-    }  // end initializeSettintsScreen()
+    }
 
     public void onEventMainThread(DataNotSendEvent event) {
-        Toast.makeText(this, "No network connection present", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, event.getReason(), Toast.LENGTH_LONG).show();
+    }
+
+    public void onEventMainThread(DataSendEvent event) {
+        Toast.makeText(this, event.getType().name() + " data successfully send to server.", Toast.LENGTH_SHORT).show();
     }
 
     /**

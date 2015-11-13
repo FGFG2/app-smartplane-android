@@ -26,6 +26,9 @@ public class DataDispatcher {
     @Inject
     private SendDataService sendDataService;
 
+    @Inject
+    private PersistDataService persistDataService;
+
     /**
      * Starts listening on events and initializes value maps
      */
