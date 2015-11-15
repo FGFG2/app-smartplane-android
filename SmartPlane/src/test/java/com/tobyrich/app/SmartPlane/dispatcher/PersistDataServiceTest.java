@@ -66,62 +66,65 @@ public class PersistDataServiceTest extends TestCase {
         RoboGuice.Util.reset();
     }
 
+
     @Test
-    public void testSaveRudderData() throws Exception {
-        // Given
+    public void testSaveAllMotorData() throws Exception {
+        //Given
+        ValueType vt = ValueType.MOTOR;
         Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
-        Mockito.when(databasehelper.getInsertStatementRudder()).thenReturn("insert into...");
+        Mockito.when(databasehelper.getInsertStatementMotor()).thenReturn("insert into...");
         Mockito.when(connection.compileStatement("insert into...")).thenReturn(preparedStatement);
-        // list with 2 rudder data
-        Map<Long, Short> rudderData = new LinkedHashMap<Long, Short>();
-        rudderData.put(5L, (short) 42);
-        rudderData.put(6L, (short) 42);
+
+        Map<Long, Short> motorData = new LinkedHashMap<Long, Short>();
+        motorData.put(5L, (short) 42);
+        motorData.put(6L, (short) 42);
 
         // When save rudder data
-        classUnderTest.saveRudderData(rudderData);
+        classUnderTest.saveData(vt, motorData);
 
-        // Then execute query 2 times
+        // Then execute query 3 times
         Mockito.verify(preparedStatement, Mockito.times(2)).execute();
     }
 
     @Test
-    public void testSaveMotorData() throws Exception {
-        // Given
+    public void testSaveAllRudderData() throws Exception {
+        //Given
+        ValueType vt = ValueType.RUDDER;
         Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
-        Mockito.when(databasehelper.getInsertStatementMotor()).thenReturn("insert into...");
+        Mockito.when(databasehelper.getInsertStatementRudder()).thenReturn("insert into...");
         Mockito.when(connection.compileStatement("insert into...")).thenReturn(preparedStatement);
-        // list with 3 motor data
-        Map<Long, Short> motorData = new LinkedHashMap<Long, Short>();
-        motorData.put(5L, (short) 42);
-        motorData.put(6L, (short) 42);
-        motorData.put(7L, (short) 42);
+
+        Map<Long, Short> rudderData = new LinkedHashMap<Long, Short>();
+        rudderData.put(5L, (short) 42);
+        rudderData.put(6L, (short) 42);
+        rudderData.put(7L, (short) 42);
 
         // When save rudder data
-        classUnderTest.saveMotorData(motorData);
+        classUnderTest.saveData(vt, rudderData);
 
         // Then execute query 3 times
         Mockito.verify(preparedStatement, Mockito.times(3)).execute();
     }
 
     @Test
-    public void testGetAllRudderData() throws Exception {
+    public void testGetAllDataMotor() throws Exception {
         //Given
-        String[] strings = {"42", "2"};
+        ValueType vt = ValueType.MOTOR;
         Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
+        Mockito.when(databasehelper.getSelectMotorColumns()).thenReturn(new String[]{"timestamp", "motor"});
+        Mockito.when(databasehelper.getDeleteStatementMotor()).thenReturn("delete ...");
+        Mockito.when(databasehelper.getTableNameMotor()).thenReturn("motor");
+        Mockito.when(databasehelper.getSelectRudderColumns()).thenReturn(new String[]{"timestamp", "rudder"});
+        Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("rudder");
         Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
-        Mockito.when(databasehelper.getTableNameRudder()).thenReturn("rudder");
-        Mockito.when(databasehelper.getSelectRudderColumns()).thenReturn(strings);
         Mockito.when(cursor.moveToFirst()).thenReturn(true);
-
         Mockito.when(cursor.getLong(0)).thenReturn(12l).thenReturn(13l);
         Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
         Mockito.when(cursor.moveToNext()).thenReturn(true).thenReturn(false);
-
-        Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("delete ...");
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
 
         //When
-        Map<Long, Short> resultMap = classUnderTest.getAllRudderData();
+        Map<Long, Short> resultMap = classUnderTest.getAllData(vt);
 
         //Then
         assertEquals(2, resultMap.size());
@@ -129,29 +132,31 @@ public class PersistDataServiceTest extends TestCase {
     }
 
     @Test
-    public void testGetAllMotorData() throws Exception {
+    public void testGetAllDataRudder() throws Exception {
         //Given
-        String[] strings = {"42", "2"};
+        ValueType vt = ValueType.RUDDER;
         Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
-        Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
-        Mockito.when(databasehelper.getTableNameMotor()).thenReturn("motor");
-        Mockito.when(databasehelper.getSelectMotorColumns()).thenReturn(strings);
-        Mockito.when(cursor.moveToFirst()).thenReturn(true);
-
-        Mockito.when(cursor.getLong(0)).thenReturn(12l).thenReturn(13l);
-        Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
-        Mockito.when(cursor.moveToNext()).thenReturn(true).thenReturn(false);
-
+        Mockito.when( databasehelper.getSelectMotorColumns()).thenReturn(new String[]{"timestamp", "motor"});
         Mockito.when(databasehelper.getDeleteStatementMotor()).thenReturn("delete ...");
+        Mockito.when(databasehelper.getTableNameRudder()).thenReturn("rudder");
+        Mockito.when(databasehelper.getSelectRudderColumns()).thenReturn(new String[]{"timestamp", "rudder"});
+        Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("rudder");
+        Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
+        Mockito.when(cursor.moveToFirst()).thenReturn(true);
+        Mockito.when(cursor.getLong(0)).thenReturn(12l);
+        Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3"));
+        Mockito.when(cursor.moveToNext()).thenReturn(false);
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
 
         //When
-        Map<Long, Short> resultMap = classUnderTest.getAllMotorData();
+        Map<Long, Short> resultMap = classUnderTest.getAllData(vt);
 
         //Then
-        assertEquals(2, resultMap.size());
+        assertEquals(1, resultMap.size());
         Mockito.verify(preparedStatement, Mockito.times(1)).execute();
     }
+
+
     private class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {

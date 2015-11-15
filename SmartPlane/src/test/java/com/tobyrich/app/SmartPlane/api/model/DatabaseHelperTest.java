@@ -7,6 +7,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
 import com.tobyrich.app.SmartPlane.dispatcher.PersistDataService;
+import com.tobyrich.app.SmartPlane.dispatcher.ValueType;
 
 import junit.framework.Assert;
 
@@ -81,6 +82,7 @@ public class DatabaseHelperTest {
     @Test
      public void dataBaseSaveReadMotor() throws Exception {
         //Given
+        ValueType vt = ValueType.MOTOR;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
         Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
@@ -88,14 +90,14 @@ public class DatabaseHelperTest {
         storeValues.put(11L, Short.valueOf("43"));
 
         //When
-        pds.saveMotorData(storeValues);
-        Map<Long, Short> savedValues = pds.getAllMotorData();
+        pds.saveData(vt, storeValues);
+        Map<Long, Short> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertEquals(savedValues, storeValues);
 
         //When getting motor data again
-        savedValues = pds.getAllMotorData();
+        savedValues = pds.getAllData(vt);
 
         //Then database should be empty
         Assert.assertTrue(savedValues.isEmpty());
@@ -104,6 +106,7 @@ public class DatabaseHelperTest {
     @Test
     public void dataBaseSaveReadRudder() throws Exception {
         //Given
+        ValueType vt = ValueType.RUDDER;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
         Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
@@ -111,14 +114,14 @@ public class DatabaseHelperTest {
         storeValues.put(11L, Short.valueOf("43"));
 
         //When
-        pds.saveRudderData(storeValues);
-        Map<Long, Short> savedValues = pds.getAllRudderData();
+        pds.saveData(vt, storeValues);
+        Map<Long, Short> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertEquals(savedValues, storeValues);
 
         //When getting motor data again
-        savedValues = pds.getAllRudderData();
+        savedValues = pds.getAllData(vt);
 
         //Then database should be empty
         Assert.assertTrue(savedValues.isEmpty());
@@ -127,6 +130,7 @@ public class DatabaseHelperTest {
     @Test
     public void dataBaseSaveEmpty() throws Exception{
         //Given
+        ValueType vt = ValueType.MOTOR;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
         Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
@@ -134,19 +138,22 @@ public class DatabaseHelperTest {
         //storeValues.put(11L, Short.valueOf("43"));
 
         //When
-        pds.saveRudderData(storeValues);
-        pds.saveMotorData(storeValues);
-        Map<Long, Short> savedValues = pds.getAllRudderData();
+        pds.saveData(vt, storeValues);
+        vt = ValueType.RUDDER;
+        pds.saveData(vt, storeValues);
+        Map<Long, Short> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertTrue(savedValues.isEmpty());
-        savedValues = pds.getAllMotorData();
+        vt = ValueType.MOTOR;
+        savedValues = pds.getAllData(vt);
         Assert.assertTrue(savedValues.isEmpty());
     }
 
     @Test
     public void dataBaseSaveNull(){
         //Given
+        ValueType vt = ValueType.RUDDER;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
         Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
@@ -154,13 +161,15 @@ public class DatabaseHelperTest {
         storeValues.put(null, Short.valueOf("43"));
 
         //When
-        pds.saveRudderData(storeValues);
-        pds.saveMotorData(storeValues);
-        Map<Long, Short> savedValues = pds.getAllRudderData();
+        pds.saveData(vt, storeValues);
+        vt = ValueType.MOTOR;
+        pds.saveData(vt, storeValues);
+        Map<Long, Short> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertTrue(savedValues.isEmpty());
-        savedValues = pds.getAllMotorData();
+        vt = ValueType.RUDDER;
+        savedValues = pds.getAllData(vt);
         Assert.assertTrue(savedValues.isEmpty());
     }
 
