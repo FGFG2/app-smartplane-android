@@ -10,9 +10,6 @@ import com.tobyrich.app.SmartPlane.api.model.DatabaseHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Created by anon on 02.11.2015.
- */
 public class PersistDataService {
     private SQLiteDatabase connection;
     @Inject
@@ -23,7 +20,7 @@ public class PersistDataService {
         this.databasehelper = databasehelper;
     }
 
-    public void saveData(ValueType type, Map<Long, Short> map) {
+    public void saveData(ValueType type, Map<Long, Object> map) {
         connection = databasehelper.getWritableDatabase();
         String insertStatement = "";
 
@@ -39,7 +36,7 @@ public class PersistDataService {
         }
 
         SQLiteStatement preparedStatement = connection.compileStatement(insertStatement);
-        for (Map.Entry<Long, Short> entry : map.entrySet())
+        for (Map.Entry<Long, Object> entry : map.entrySet())
         {
             if (entry.getKey() != null && entry.getValue() != null) {
                 preparedStatement.bindString(1, entry.getKey().toString());
@@ -52,9 +49,9 @@ public class PersistDataService {
     }
 
 
-    public Map<Long, Short> getAllData(ValueType type){
+    public Map<Long, Object> getAllData(ValueType type) {
         connection = databasehelper.getWritableDatabase();
-        Map<Long, Short> resultMap = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> resultMap = new LinkedHashMap<>();
         String tablename = "";
         String[] tableColumns = {""};
         String deletestatement = "";

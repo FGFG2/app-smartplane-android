@@ -124,9 +124,6 @@ public class BluetoothDelegate
 
                 // Send event to inform data dispatcher
                 EventBus.getDefault().post(new MotorChangedEvent(Optional.fromNullable(value)));
-            } else {
-                //TODO: DEBUG CODE --> REMOVE LATER
-                EventBus.getDefault().post(new MotorChangedEvent(Optional.fromNullable(value)));
             }
         }
     }
@@ -146,9 +143,6 @@ public class BluetoothDelegate
                 smartplaneService.setRudder(value);
 
                 // Send event to inform data dispatcher
-                EventBus.getDefault().post(new RudderChangedEvent(Optional.fromNullable(value)));
-            } else {
-                //TODO: DEBUG CODE --> REMOVE LATER
                 EventBus.getDefault().post(new RudderChangedEvent(Optional.fromNullable(value)));
             }
         }

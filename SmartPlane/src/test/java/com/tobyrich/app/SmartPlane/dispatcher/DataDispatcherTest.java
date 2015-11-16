@@ -4,6 +4,9 @@ import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
+import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataSendEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.ConnectionStatusChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.MotorChangedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.valuechanged.RudderChangedEvent;
@@ -22,7 +25,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 
@@ -35,6 +41,10 @@ public class DataDispatcherTest extends TestCase {
 
     @Mock
     private SendDataService sendDataService;
+
+    @Mock
+    private PersistDataService persistDataService;
+
 
     @Before
     public void setUp() throws Exception {
@@ -52,7 +62,7 @@ public class DataDispatcherTest extends TestCase {
 
     @After
     public void teardown() {
-        classUnderTest.stopAchievementMonitoring();
+        EventBus.getDefault().post(new ActivityStoppedEvent());
         RoboGuice.Util.reset();
     }
 
@@ -121,11 +131,49 @@ public class DataDispatcherTest extends TestCase {
         Mockito.verify(sendDataService).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
     }
 
+    @Test
+    public void testOnEventBackgroundThreadNotSend() throws Exception {
+        // Given
+        Map<Long, Object> map = new LinkedHashMap<>();
+        map.put(1L, (short) 1);
+        DataNotSendEvent event = new DataNotSendEvent("", ValueType.MOTOR);
+
+        // When
+        classUnderTest.getMotorMap().putAll(map);
+        classUnderTest.onEventBackgroundThread(event);
+
+        // Then
+        assertTrue(classUnderTest.getMotorMap().isEmpty());
+        assertTrue(classUnderTest.isCouldNotSendPreviousData());
+        Mockito.verify(persistDataService).saveData(ValueType.MOTOR, classUnderTest.getMotorMap());
+    }
+
+    @Test
+    public void testOnEventBackgroundThreadSend() throws Exception {
+        // Given
+        Map<Long, Object> map = new LinkedHashMap<>();
+        map.put(1L, (short) 1);
+        Mockito.when(persistDataService.getAllData(Mockito.any(ValueType.class))).thenReturn(map);
+        DataSendEvent event = new DataSendEvent(ValueType.MOTOR);
+
+        // When
+        classUnderTest.setCouldNotSendPreviousData(true);
+        classUnderTest.onEventBackgroundThread(event);
+
+        // Then
+        assertEquals(map, classUnderTest.getMotorMap());
+        assertEquals(map, classUnderTest.getRudderMap());
+        assertEquals(map, classUnderTest.getIsConnectedMap());
+        assertFalse(classUnderTest.isCouldNotSendPreviousData());
+        Mockito.verify(sendDataService, Mockito.never()).sendData(Mockito.anyMap(), Mockito.any(ValueType.class));
+    }
+
     private class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {
             // Replace injected class with mock
             bind(SendDataService.class).toInstance(sendDataService);
+            bind(PersistDataService.class).toInstance(persistDataService);
         }
     }
 }

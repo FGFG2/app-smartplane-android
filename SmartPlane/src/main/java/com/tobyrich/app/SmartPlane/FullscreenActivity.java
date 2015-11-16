@@ -56,6 +56,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
+import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataSendEvent;
 import com.tobyrich.app.SmartPlane.util.Const;
@@ -108,7 +109,7 @@ public class FullscreenActivity extends RoboActivity {
 
     @Override
     public void onStop() {
-        dataDispatcher.stopAchievementMonitoring();
+        EventBus.getDefault().post(new ActivityStoppedEvent());
         EventBus.getDefault().unregister(this);
         super.onStop();
     }

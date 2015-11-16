@@ -27,10 +27,6 @@ import java.util.Map;
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 
-/**
- * Created by anon on 09.11.2015.
- */
-
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class DatabaseHelperTest {
@@ -41,9 +37,6 @@ public class DatabaseHelperTest {
     public void setUp() throws Exception {
         // Create mock for private members of test
         MockitoAnnotations.initMocks(this);
-
-        // Set up Mockito behavior
-
 
         // Override injector and perform injection
         RoboGuice.overrideApplicationInjector(RuntimeEnvironment.application, new MyTestModule());
@@ -85,13 +78,13 @@ public class DatabaseHelperTest {
         ValueType vt = ValueType.MOTOR;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
-        Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> storeValues = new LinkedHashMap<>();
         storeValues.put(10L, Short.valueOf("42"));
         storeValues.put(11L, Short.valueOf("43"));
 
         //When
         pds.saveData(vt, storeValues);
-        Map<Long, Short> savedValues = pds.getAllData(vt);
+        Map<Long, Object> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertEquals(savedValues, storeValues);
@@ -109,13 +102,13 @@ public class DatabaseHelperTest {
         ValueType vt = ValueType.RUDDER;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
-        Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> storeValues = new LinkedHashMap<>();
         storeValues.put(10L, Short.valueOf("42"));
         storeValues.put(11L, Short.valueOf("43"));
 
         //When
         pds.saveData(vt, storeValues);
-        Map<Long, Short> savedValues = pds.getAllData(vt);
+        Map<Long, Object> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertEquals(savedValues, storeValues);
@@ -133,7 +126,7 @@ public class DatabaseHelperTest {
         ValueType vt = ValueType.MOTOR;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
-        Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> storeValues = new LinkedHashMap<>();
         //storeValues.put(10L, Short.valueOf("42"));
         //storeValues.put(11L, Short.valueOf("43"));
 
@@ -141,7 +134,7 @@ public class DatabaseHelperTest {
         pds.saveData(vt, storeValues);
         vt = ValueType.RUDDER;
         pds.saveData(vt, storeValues);
-        Map<Long, Short> savedValues = pds.getAllData(vt);
+        Map<Long, Object> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertTrue(savedValues.isEmpty());
@@ -156,7 +149,7 @@ public class DatabaseHelperTest {
         ValueType vt = ValueType.RUDDER;
         SQLiteDatabase connection = classUnderTest.getWritableDatabase();
         PersistDataService pds = new PersistDataService(classUnderTest);
-        Map<Long, Short> storeValues = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> storeValues = new LinkedHashMap<>();
         storeValues.put(10L, null);
         storeValues.put(null, Short.valueOf("43"));
 
@@ -164,7 +157,7 @@ public class DatabaseHelperTest {
         pds.saveData(vt, storeValues);
         vt = ValueType.MOTOR;
         pds.saveData(vt, storeValues);
-        Map<Long, Short> savedValues = pds.getAllData(vt);
+        Map<Long, Object> savedValues = pds.getAllData(vt);
 
         //Then
         Assert.assertTrue(savedValues.isEmpty());
@@ -177,9 +170,6 @@ public class DatabaseHelperTest {
     private class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {
-            // Replace injected class with mock
-            //bind(RetrofitServiceManager.class).toInstance(retrofitServiceManager);
         }
     }
-
 }

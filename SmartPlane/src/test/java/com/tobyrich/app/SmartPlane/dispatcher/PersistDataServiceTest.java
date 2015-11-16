@@ -28,10 +28,6 @@ import java.util.Map;
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 
-/**
- * Created by anon on 03.11.2015.
- */
-
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class PersistDataServiceTest extends TestCase {
@@ -75,7 +71,7 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(databasehelper.getInsertStatementMotor()).thenReturn("insert into...");
         Mockito.when(connection.compileStatement("insert into...")).thenReturn(preparedStatement);
 
-        Map<Long, Short> motorData = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> motorData = new LinkedHashMap<>();
         motorData.put(5L, (short) 42);
         motorData.put(6L, (short) 42);
 
@@ -94,7 +90,7 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(databasehelper.getInsertStatementRudder()).thenReturn("insert into...");
         Mockito.when(connection.compileStatement("insert into...")).thenReturn(preparedStatement);
 
-        Map<Long, Short> rudderData = new LinkedHashMap<Long, Short>();
+        Map<Long, Object> rudderData = new LinkedHashMap<>();
         rudderData.put(5L, (short) 42);
         rudderData.put(6L, (short) 42);
         rudderData.put(7L, (short) 42);
@@ -124,7 +120,7 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
 
         //When
-        Map<Long, Short> resultMap = classUnderTest.getAllData(vt);
+        Map<Long, Object> resultMap = classUnderTest.getAllData(vt);
 
         //Then
         assertEquals(2, resultMap.size());
@@ -149,7 +145,7 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
 
         //When
-        Map<Long, Short> resultMap = classUnderTest.getAllData(vt);
+        Map<Long, Object> resultMap = classUnderTest.getAllData(vt);
 
         //Then
         assertEquals(1, resultMap.size());
