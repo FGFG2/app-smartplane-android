@@ -101,7 +101,7 @@ public class BluetoothDelegate
             device = new BluetoothDevice(activity.getResources().openRawResource(R.raw.services),
                     activity);
             device.delegate = new WeakReference<BluetoothDevice.Delegate>(this);
-            device.automaticallyReconnect = true;
+            device.automaticallyReconnect = false;
         } catch (IllegalArgumentException e) {
             Log.wtf(TAG, "Could not create BluetoothDevice (maybe invalid plist?)");
             e.printStackTrace();
@@ -158,10 +158,12 @@ public class BluetoothDelegate
     }
 
     public void disconnect() {
-        device.disconnect();
+        if (device != null && smartplaneService != null) {
+            device.disconnect();
 
-        // Inform data dispatcher about connection status change
-        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
+            // Inform data dispatcher about connection status change
+            EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
+        }
     }
 
     /**
@@ -278,6 +280,10 @@ public class BluetoothDelegate
 
             SignalTimerTask sigTask = new SignalTimerTask(device);
             timer.scheduleAtFixedRate(sigTask, Const.TIMER_DELAY, Const.TIMER_PERIOD);
+
+            // Inform data dispatcher about connection status change
+            EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.TRUE)));
+
             return;
 
         }
@@ -292,9 +298,6 @@ public class BluetoothDelegate
             batteryService = (BLEBatteryService) service;
             batteryService.delegate = new WeakReference<BLEBatteryService.Delegate>(this);
         }
-
-        // Inform data dispatcher about connection status change
-        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.TRUE)));
     }
 
     /**

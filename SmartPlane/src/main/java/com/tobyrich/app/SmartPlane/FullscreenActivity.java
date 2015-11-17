@@ -126,6 +126,16 @@ public class FullscreenActivity extends RoboActivity {
         if (sensorHandler != null) {
             sensorHandler.registerListener();
         }
+
+        if (bluetoothDelegate != null) {
+            try {
+                bluetoothDelegate.connect();
+            } catch (BluetoothDisabledException ex) {
+                Intent enableBtIntent =
+                        new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, Util.BT_REQUEST_CODE);
+            }
+        }
     }
 
     @Override
@@ -139,6 +149,7 @@ public class FullscreenActivity extends RoboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        bluetoothDelegate = new BluetoothDelegate(this);
         audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
         // Instantiate a ViewPager and a PagerAdapter
@@ -218,14 +229,6 @@ public class FullscreenActivity extends RoboActivity {
      * the event listeners, the BluetoothDelegate & SensorHandler
      */
     private void initializeMainScreen() {
-        bluetoothDelegate = new BluetoothDelegate(this);
-        try {
-            bluetoothDelegate.connect();
-        } catch (BluetoothDisabledException ex) {
-            Intent enableBtIntent =
-                    new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, Util.BT_REQUEST_CODE);
-        }
         sensorHandler = new SensorHandler(this, bluetoothDelegate);
         sensorHandler.registerListener();
         gestureDetector = new GestureDetector(this,

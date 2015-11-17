@@ -35,6 +35,13 @@ public class DataDispatcher {
      * Starts listening on events, initializes value maps and send remaining data
      */
     public void startAchievementMonitoring() {
+        // wait if object is still registered --> shutting down atm
+        while (EventBus.getDefault().isRegistered(this)) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+        }
         EventBus.getDefault().register(this);
         motorMap = new LinkedHashMap<>();
         rudderMap = new LinkedHashMap<>();
