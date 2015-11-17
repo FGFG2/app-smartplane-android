@@ -109,6 +109,7 @@ public class FullscreenActivity extends RoboActivity {
 
     @Override
     public void onStop() {
+        bluetoothDelegate.disconnect();
         EventBus.getDefault().post(new ActivityStoppedEvent());
         EventBus.getDefault().unregister(this);
         super.onStop();
@@ -208,9 +209,6 @@ public class FullscreenActivity extends RoboActivity {
                         //This resets all cached data from the app and breaks the connection.
                         //The app itself is only minimized, but not closed.
                         FullscreenActivity.this.finish();
-                        // TODO: WHY WOULD ONE KILL THE APP PROCESS??
-                        //int pid = android.os.Process.myPid();
-                        //android.os.Process.killProcess(pid);
                     }
                 }).create().show();
     }

@@ -150,7 +150,7 @@ public class DataDispatcher {
      * @return current time
      */
     private long getCurrentTime() {
-        return Calendar.getInstance().getTimeInMillis() / PRECISION;
+        return (Calendar.getInstance().getTimeInMillis() / PRECISION) * PRECISION;
     }
 
     /* package */Map<Long, Object> getMotorMap() {

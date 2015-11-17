@@ -157,6 +157,13 @@ public class BluetoothDelegate
         device.connect();
     }
 
+    public void disconnect() {
+        device.disconnect();
+
+        // Inform data dispatcher about connection status change
+        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
+    }
+
     /**
      * Callback when battery starts charging
      * We just update the UI status
@@ -359,9 +366,6 @@ public class BluetoothDelegate
             }
         });
         Util.showSearching(activity, true);
-
-        // Inform data dispatcher about connection status change
-        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
     }
 
 }
