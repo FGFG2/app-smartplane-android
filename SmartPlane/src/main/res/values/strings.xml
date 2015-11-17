@@ -104,11 +104,20 @@
             motor int not null
             )
         </item>
+        <item>
+            create table connection(
+            id integer primary key autoincrement,
+            timestamp int not null,
+            connection boolean not null
+            )
+        </item>
     </string-array>
     <string name="insertRudderPrep">insert into rudder(timestamp,rudder) values(?,?)</string>
     <string name="insertMotorPrep">insert into motor(timestamp,motor) values(?,?)</string>
+    <string name="insertConnectionPrep">insert into connection(timestamp,connection) values(?,?)</string>
     <string name="tableNameRudder">rudder</string>
     <string name="tableNameMotor">motor</string>
+    <string name="tableNameConnection">connection</string>
     <string-array name="selectRudderColumns">
         <item>
             timestamp
@@ -125,6 +134,15 @@
             motor
         </item>
     </string-array>
+    <string-array name="selectConnectionColumns">
+        <item>
+            timestamp
+        </item>
+        <item>
+            connection
+        </item>
+    </string-array>
     <string name="deleteRudderPrep">delete from rudder</string>
     <string name="deleteMotorPrep">delete from motor</string>
+    <string name="deleteConnectionPrep">delete from connection</string>
 </resources>

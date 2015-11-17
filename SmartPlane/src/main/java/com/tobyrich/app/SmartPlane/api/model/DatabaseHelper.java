@@ -41,12 +41,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return context.getResources().getString(R.string.insertMotorPrep);
     }
 
+    public String getInsertStatementConnection(){
+        return context.getResources().getString(R.string.insertConnectionPrep);
+    }
+
     public String[] getSelectRudderColumns(){
         return context.getResources().getStringArray(R.array.selectRudderColumns);
     }
 
     public String[] getSelectMotorColumns(){
         return context.getResources().getStringArray(R.array.selectMotorColumns);
+    }
+
+    public String[] getSelectConnectionColumns(){
+        return context.getResources().getStringArray(R.array.selectConnectionColumns);
     }
 
     public String getDeleteStatementRudder(){
@@ -57,11 +65,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return context.getResources().getString(R.string.deleteMotorPrep);
     }
 
+    public String getDeleteStatementConnections(){
+        return context.getResources().getString(R.string.deleteConnectionPrep);
+    }
+
     public String getTableNameRudder(){
         return context.getResources().getString(R.string.tableNameRudder);
     }
 
     public String getTableNameMotor(){
         return context.getResources().getString(R.string.tableNameMotor);
+    }
+
+    public String getTableNameConnection(){
+        return context.getResources().getString(R.string.tableNameConnection);
     }
 }

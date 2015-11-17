@@ -69,6 +69,7 @@ public class DatabaseHelperTest {
         //Then
         Assert.assertTrue(tables.contains("rudder"));
         Assert.assertTrue(tables.contains("motor"));
+        Assert.assertTrue(tables.contains("connection"));
     }
 
 
@@ -113,7 +114,31 @@ public class DatabaseHelperTest {
         //Then
         Assert.assertEquals(savedValues, storeValues);
 
-        //When getting motor data again
+        //When getting rudder data again
+        savedValues = pds.getAllData(vt);
+
+        //Then database should be empty
+        Assert.assertTrue(savedValues.isEmpty());
+    }
+
+    @Test
+    public void dataBaseSaveReadConnection() throws Exception {
+        //Given
+        ValueType vt = ValueType.CONNECTION_STATE;
+        SQLiteDatabase connection = classUnderTest.getWritableDatabase();
+        PersistDataService pds = new PersistDataService(classUnderTest);
+        Map<Long, Object> storeValues = new LinkedHashMap<>();
+        storeValues.put(10L, true);
+        storeValues.put(11L, false);
+
+        //When
+        pds.saveData(vt, storeValues);
+        Map<Long, Object> savedValues = pds.getAllData(vt);
+
+        //Then
+        Assert.assertEquals(savedValues, storeValues);
+
+        //When getting connection data again
         savedValues = pds.getAllData(vt);
 
         //Then database should be empty

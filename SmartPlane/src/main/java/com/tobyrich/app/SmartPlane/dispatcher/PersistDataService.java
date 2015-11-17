@@ -32,6 +32,7 @@ public class PersistDataService {
                 insertStatement = databasehelper.getInsertStatementRudder();
                 break;
             case CONNECTION_STATE:
+                insertStatement = databasehelper.getInsertStatementConnection();
                 break;
         }
 
@@ -69,7 +70,9 @@ public class PersistDataService {
                 deletestatement = databasehelper.getDeleteStatementRudder();
                 break;
             case CONNECTION_STATE:
-                //TODO: machen
+                tablename = databasehelper.getTableNameConnection();
+                tableColumns = databasehelper.getSelectConnectionColumns();
+                deletestatement = databasehelper.getDeleteStatementConnections();
                 break;
         }
 
@@ -88,7 +91,14 @@ public class PersistDataService {
             //Fill map with data
             if (cursor.moveToFirst()) {
                 do {
-                    resultMap.put(cursor.getLong(0), cursor.getShort(1));
+                    if (cursor.getString(1).equals("true")){
+                        resultMap.put(cursor.getLong(0), true);
+                    }else if (cursor.getString(1).equals("false")){
+                        resultMap.put(cursor.getLong(0), false);
+                    }else {
+                        resultMap.put(cursor.getLong(0), cursor.getShort(1));
+
+                    }
                 } while (cursor.moveToNext());
             }
 

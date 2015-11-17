@@ -103,6 +103,26 @@ public class PersistDataServiceTest extends TestCase {
     }
 
     @Test
+    public void testSaveAllConnectionData() throws Exception {
+        //Given
+        ValueType vt = ValueType.CONNECTION_STATE;
+        Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
+        Mockito.when(databasehelper.getInsertStatementConnection()).thenReturn("insert into...");
+        Mockito.when(connection.compileStatement("insert into...")).thenReturn(preparedStatement);
+
+        Map<Long, Object>connectionData = new LinkedHashMap<>();
+        connectionData.put(5L, true);
+        connectionData.put(6L, true);
+        connectionData.put(7L, false);
+
+        // When save rudder data
+        classUnderTest.saveData(vt, connectionData);
+
+        // Then execute query 3 times
+        Mockito.verify(preparedStatement, Mockito.times(3)).execute();
+    }
+
+    @Test
     public void testGetAllDataMotor() throws Exception {
         //Given
         ValueType vt = ValueType.MOTOR;
@@ -115,6 +135,7 @@ public class PersistDataServiceTest extends TestCase {
         Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
         Mockito.when(cursor.moveToFirst()).thenReturn(true);
         Mockito.when(cursor.getLong(0)).thenReturn(12l).thenReturn(13l);
+        Mockito.when(cursor.getString(1)).thenReturn("42");
         Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3")).thenReturn(Short.valueOf("42"));
         Mockito.when(cursor.moveToNext()).thenReturn(true).thenReturn(false);
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
@@ -132,15 +153,41 @@ public class PersistDataServiceTest extends TestCase {
         //Given
         ValueType vt = ValueType.RUDDER;
         Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
-        Mockito.when( databasehelper.getSelectMotorColumns()).thenReturn(new String[]{"timestamp", "motor"});
-        Mockito.when(databasehelper.getDeleteStatementMotor()).thenReturn("delete ...");
+        Mockito.when( databasehelper.getSelectRudderColumns()).thenReturn(new String[]{"timestamp", "motor"});
+        Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("delete ...");
         Mockito.when(databasehelper.getTableNameRudder()).thenReturn("rudder");
         Mockito.when(databasehelper.getSelectRudderColumns()).thenReturn(new String[]{"timestamp", "rudder"});
         Mockito.when(databasehelper.getDeleteStatementRudder()).thenReturn("rudder");
         Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
         Mockito.when(cursor.moveToFirst()).thenReturn(true);
         Mockito.when(cursor.getLong(0)).thenReturn(12l);
+        Mockito.when(cursor.getString(1)).thenReturn("3");
         Mockito.when(cursor.getShort(1)).thenReturn(Short.valueOf("3"));
+        Mockito.when(cursor.moveToNext()).thenReturn(false);
+        Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
+
+        //When
+        Map<Long, Object> resultMap = classUnderTest.getAllData(vt);
+
+        //Then
+        assertEquals(1, resultMap.size());
+        Mockito.verify(preparedStatement, Mockito.times(1)).execute();
+    }
+
+    @Test
+    public void testGetAllDataConnection() throws Exception {
+        //Given
+        ValueType vt = ValueType.CONNECTION_STATE;
+        Mockito.when(databasehelper.getWritableDatabase()).thenReturn(connection);
+        Mockito.when( databasehelper.getSelectMotorColumns()).thenReturn(new String[]{"timestamp", "connection"});
+        Mockito.when(databasehelper.getDeleteStatementConnections()).thenReturn("delete ...");
+        Mockito.when(databasehelper.getTableNameConnection()).thenReturn("connection");
+        Mockito.when(databasehelper.getSelectConnectionColumns()).thenReturn(new String[]{"timestamp", "connection"});
+        Mockito.when(databasehelper.getDeleteStatementConnections()).thenReturn("connection");
+        Mockito.when(connection.query(Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.any(String[].class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(cursor);
+        Mockito.when(cursor.moveToFirst()).thenReturn(true);
+        Mockito.when(cursor.getLong(0)).thenReturn(12l);
+        Mockito.when(cursor.getString(1)).thenReturn("true");
         Mockito.when(cursor.moveToNext()).thenReturn(false);
         Mockito.when(connection.compileStatement(Mockito.anyString())).thenReturn(preparedStatement);
 
