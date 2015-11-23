@@ -160,9 +160,6 @@ public class BluetoothDelegate
     public void disconnect() {
         if (device != null && smartplaneService != null) {
             device.disconnect();
-
-            // Inform data dispatcher about connection status change
-            EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
         }
     }
 
@@ -369,6 +366,9 @@ public class BluetoothDelegate
             }
         });
         Util.showSearching(activity, true);
+
+        // Inform data dispatcher about connection status change
+        EventBus.getDefault().post(new ConnectionStatusChangedEvent(Optional.of(Boolean.FALSE)));
     }
 
 }
