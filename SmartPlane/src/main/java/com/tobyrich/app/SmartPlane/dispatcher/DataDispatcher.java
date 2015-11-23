@@ -14,9 +14,9 @@ import de.greenrobot.event.EventBus;
 
 public class DataDispatcher {
 
-    public static final int MOTOR_BUFFER_SIZE = 100;
-    public static final int RUDDER_BUFFER_SIZE = 100;
-    public static final int IS_CONNECTED_BUFFER_SIZE = 10;
+    public static final int MOTOR_BUFFER_SIZE = 20;
+    public static final int RUDDER_BUFFER_SIZE = 50;
+    public static final int IS_CONNECTED_BUFFER_SIZE = 2;
     public static final int PRECISION = 100; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
 
     private Map<Long, Object> motorMap;
