@@ -109,6 +109,18 @@ public class AchievementServiceTest extends TestCase {
         assertFalse(achievementList.isEmpty());
     }
 
+    @Test
+    public void testGetObtainedAchievements() throws Exception {
+        // When
+        final Call<List<Achievement>> call = achievementService.getObtainedAchievements();
+        final List<Achievement> achievementList = call.execute().body();
+
+        // Then
+        for (Achievement achievement : achievementList){
+            assertTrue(achievement.getProgress() == 100);
+        }
+    }
+
     private class MyTestModule extends AbstractModule {
         @Override
         protected void configure() {

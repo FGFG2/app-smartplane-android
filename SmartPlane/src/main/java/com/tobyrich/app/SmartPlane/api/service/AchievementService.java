@@ -14,6 +14,9 @@ public interface AchievementService {
     @GET("api/AllAchievements")
     Call<List<Achievement>> getAllAchievements();
 
+    @GET("api/ObtainedAchievements")
+    Call<List<Achievement>> getObtainedAchievements();
+
     @POST("api/SetMotor")
     <S, T> Call<String> setMotor(@Body Map<S, T> map);
 
