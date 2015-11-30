@@ -45,6 +45,7 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
     compile 'com.google.guava:guava:18.0'
     compile 'org.roboguice:roboguice:3.+'
     compile project(':indicator-library')
