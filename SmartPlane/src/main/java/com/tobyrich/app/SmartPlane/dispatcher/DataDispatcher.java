@@ -31,6 +31,9 @@ public class DataDispatcher {
     @Inject
     private PersistDataService persistDataService;
 
+    @Inject
+    private AchievementCheckerService achievementCheckerService;
+
     /**
      * Starts listening on events, initializes value maps and send remaining data
      */
@@ -47,6 +50,7 @@ public class DataDispatcher {
         rudderMap = new LinkedHashMap<>();
         isConnectedMap = new LinkedHashMap<>();
         addRemainingDataFromDatabase();
+        achievementCheckerService.startAchievementMonitoring();
     }
 
     /**
@@ -56,6 +60,7 @@ public class DataDispatcher {
         sendDataIfBufferOverflow(true);
         couldNotSendPreviousData = false;
         EventBus.getDefault().unregister(this);
+        achievementCheckerService.stopAchievementMonitoring();
     }
 
     /**

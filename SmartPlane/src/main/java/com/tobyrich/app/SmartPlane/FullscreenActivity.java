@@ -38,6 +38,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -56,6 +57,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
+import com.tobyrich.app.SmartPlane.dispatcher.event.AchievmentUnlockedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataSendEvent;
@@ -363,6 +365,11 @@ public class FullscreenActivity extends RoboActivity {
 
     public void onEventMainThread(DataNotSendEvent event) {
         Toast.makeText(this, event.getReason(), Toast.LENGTH_LONG).show();
+    }
+
+    public void onEventMainThread(AchievmentUnlockedEvent event){
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(200);
     }
 
     public void onEventMainThread(DataSendEvent event) {
