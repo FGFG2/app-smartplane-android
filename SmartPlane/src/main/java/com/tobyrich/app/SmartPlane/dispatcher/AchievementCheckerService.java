@@ -8,7 +8,7 @@ import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
 import com.tobyrich.app.SmartPlane.api.model.Achievement;
 import com.tobyrich.app.SmartPlane.api.service.AchievementService;
-import com.tobyrich.app.SmartPlane.dispatcher.event.AchievmentUnlockedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public class AchievementCheckerService {
             //Create event if there is more than 0 new achievement
             //current achievement initialized (not first run)
             if (newAchievements.size() > 0 && !currentAchievements.equals(null)){
-                EventBus.getDefault().post(new AchievmentUnlockedEvent(newAchievements));
+                EventBus.getDefault().post(new AchievementUnlockedEvent(newAchievements));
             }
 
             //save achievements

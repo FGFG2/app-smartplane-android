@@ -57,7 +57,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
-import com.tobyrich.app.SmartPlane.dispatcher.event.AchievmentUnlockedEvent;
+import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataSendEvent;
@@ -367,7 +367,7 @@ public class FullscreenActivity extends RoboActivity {
         Toast.makeText(this, event.getReason(), Toast.LENGTH_LONG).show();
     }
 
-    public void onEventMainThread(AchievmentUnlockedEvent event){
+    public void onEventMainThread(AchievementUnlockedEvent event){
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(200);
     }
