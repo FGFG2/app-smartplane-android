@@ -7,7 +7,6 @@ import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.tobyrich.app.SmartPlane.BuildConfig;
-import com.tobyrich.app.SmartPlane.api.model.Token;
 
 import junit.framework.TestCase;
 
@@ -55,15 +54,13 @@ public class AuthInterceptorTest extends TestCase {
     public void testSetToken() throws Exception {
         // Given
         String authTokenString = "123456789";
-        Token testToken = new Token();
-        testToken.setAccess_token(authTokenString);
 
         // When
-        classUnderTest.setToken(testToken);
+        classUnderTest.setToken(authTokenString);
 
         // Then
         assertTrue(classUnderTest.getToken().isPresent());
-        assertEquals(testToken, classUnderTest.getToken().get());
+        assertEquals(authTokenString, classUnderTest.getToken().get());
     }
 
     @Test
@@ -84,8 +81,7 @@ public class AuthInterceptorTest extends TestCase {
     @Test
     public void testInterceptWithToken() throws Exception {
         // Given
-        Token token = new Token();
-        token.setAccess_token("123");
+        String token = "123";
         classUnderTest.setToken(token);
         Request request = new Request.Builder().url("http://google.de").build();
         Response response = new Response.Builder().request(request).protocol(Protocol.HTTP_1_1).code(200).build();

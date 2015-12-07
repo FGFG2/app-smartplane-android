@@ -19,20 +19,19 @@ public class UserDataService {
     @Inject
     private RetrofitServiceManager serviceManager;
 
-    public Boolean login(String email, String password) {
+    public Optional<String> login(String email, String password) {
         try {
             UserService userService = serviceManager.getUserService();
             final Optional<Response<Token>> response = Optional
                     .fromNullable(userService.login(GRANT_TYPE, email, password).execute());
             if (response.isPresent() && response.get().isSuccess()) {
                 Token token = response.get().body();
-                serviceManager.registerSession(token);
                 Log.i(this.getClass().getSimpleName(), "Login successful.");
-                return true;
+                return Optional.fromNullable(token.getAccess_token());
             }
         } catch (IOException e) {
             Log.e(this.getClass().getSimpleName(), "Error while logging in user.", e);
         }
-        return false;
+        return Optional.absent();
     }
 }

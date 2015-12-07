@@ -1,5 +1,6 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
+import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.BuildConfig;
@@ -63,14 +64,17 @@ public class UserDataServiceTest extends TestCase {
     @Test
     public void testLogin() throws Exception {
         // Given
-        Mockito.when(call.execute()).thenReturn(Response.success(null));
+        String tokenString = "123";
+        Token token = new Token();
+        token.setAccess_token(tokenString);
+        Mockito.when(call.execute()).thenReturn(Response.success(token));
 
         // When
-        Boolean result = classUnderTest.login("", "");
+        Optional<String> result = classUnderTest.login("", "");
 
         // Then
-        assertTrue(result);
-        Mockito.verify(retrofitServiceManager).registerSession(Mockito.any(Token.class));
+        assertTrue(result.isPresent());
+        assertEquals(tokenString, result.get());
     }
 
     @Test
@@ -79,11 +83,10 @@ public class UserDataServiceTest extends TestCase {
         Mockito.when(call.execute()).thenReturn(Response.error(400, null));
 
         // When
-        Boolean result = classUnderTest.login("", "");
+        Optional<String> result = classUnderTest.login("", "");
 
         // Then
-        assertFalse(result);
-        Mockito.verify(retrofitServiceManager, Mockito.never()).registerSession(Mockito.any(Token.class));
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -92,11 +95,10 @@ public class UserDataServiceTest extends TestCase {
         Mockito.when(call.execute()).thenReturn(null);
 
         // When
-        Boolean result = classUnderTest.login("", "");
+        Optional<String> result = classUnderTest.login("", "");
 
         // Then
-        assertFalse(result);
-        Mockito.verify(retrofitServiceManager, Mockito.never()).registerSession(Mockito.any(Token.class));
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -105,11 +107,10 @@ public class UserDataServiceTest extends TestCase {
         Mockito.when(call.execute()).thenThrow(new IOException());
 
         // When
-        Boolean result = classUnderTest.login("", "");
+        Optional<String> result = classUnderTest.login("", "");
 
         // Then
-        assertFalse(result);
-        Mockito.verify(retrofitServiceManager, Mockito.never()).registerSession(Mockito.any(Token.class));
+        assertFalse(result.isPresent());
     }
 
     private class MyTestModule extends AbstractModule {

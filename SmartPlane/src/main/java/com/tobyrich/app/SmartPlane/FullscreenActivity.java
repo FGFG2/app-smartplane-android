@@ -27,6 +27,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.tobyrich.app.SmartPlane;
 
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -56,6 +59,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
+import com.tobyrich.app.SmartPlane.account.AccountConstants;
+import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
 import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
 import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
@@ -101,6 +106,10 @@ public class FullscreenActivity extends RoboActivity {
 
     @Inject
     private DataDispatcher dataDispatcher;
+    @Inject
+    private AccountManager accountManager;
+    @Inject
+    private RetrofitServiceManager serviceManager;
 
     @Override
     public void onStart() {
@@ -166,6 +175,9 @@ public class FullscreenActivity extends RoboActivity {
         screenPager.setOffscreenPageLimit(2);
 
         buttonConfig = this.getSharedPreferences("button_config", MODE_PRIVATE);
+
+        // Authenticate user --> get token
+        getTokenForAccountCreateIfNeeded(AccountConstants.ACCOUNT_TYPE, AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS);
     }
 
     /**
@@ -374,6 +386,30 @@ public class FullscreenActivity extends RoboActivity {
 
     public void onEventMainThread(DataSendEvent event) {
         Toast.makeText(this, event.getType().name() + " data successfully send to server.", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Get an auth token for the account.
+     * If not exist - add it and then return its auth token.
+     * If one exist - return its auth token.
+     * If more than one exists - show a picker and return the select account's auth token.
+     */
+    private void getTokenForAccountCreateIfNeeded(String accountType, String authTokenType) {
+        accountManager.getAuthTokenByFeatures(accountType, authTokenType, null, this, null, null,
+                new AccountManagerCallback<Bundle>() {
+                    @Override
+                    public void run(AccountManagerFuture<Bundle> future) {
+                        try {
+                            Bundle bnd = future.getResult();
+                            final String authtoken = bnd.getString(AccountManager.KEY_AUTHTOKEN);
+                            serviceManager.registerSession(authtoken);
+                            Log.d(TAG, "Got token --> Successfully authenticated: " + bnd);
+                        } catch (Exception e) {
+                            Log.e(TAG, "No authentication token present!", e);
+                        }
+                    }
+                }
+                , null);
     }
 
     /**

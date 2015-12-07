@@ -1,11 +1,15 @@
-package com.tobyrich.app.SmartPlane;
+package com.tobyrich.app.SmartPlane.account;
 
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,45 +18,63 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.tobyrich.app.SmartPlane.R;
 import com.tobyrich.app.SmartPlane.dispatcher.UserDataService;
 
-import roboguice.activity.RoboActivity;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
+import java.io.IOException;
+
+import roboguice.RoboGuice;
+import roboguice.inject.RoboInjector;
 
 
 /**
  * A login screen that offers login via email/password.
  */
-@ContentView(R.layout.activity_login)
-public class LoginActivity extends RoboActivity {
+public class LoginActivity extends AccountAuthenticatorActivity {
+
+    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
+
+    private final String TAG = this.getClass().getSimpleName();
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    private String authTokenType;
+    private String accountType;
 
     @Inject
     private UserDataService userDataService;
+    @Inject
+    private AccountManager accountManager;
 
 
     // UI references.
-    @InjectView(R.id.email)
     private AutoCompleteTextView mEmailView;
-    @InjectView(R.id.password)
     private EditText mPasswordView;
-    @InjectView(R.id.login_progress)
     private View mProgressView;
-    @InjectView(R.id.login_form)
     private View mLoginFormView;
-    @InjectView(R.id.email_sign_in_button)
     private Button mEmailSignInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        final RoboInjector injector = RoboGuice.getInjector(this.getApplicationContext());
+        injector.injectMembersWithoutViews(this);
+
+        accountType = getIntent().getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+        authTokenType = getIntent().getStringExtra(AccountManager.KEY_AUTHENTICATOR_TYPES);
+        if (authTokenType == null) {
+            authTokenType = AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS;
+        }
+        initViews();
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -69,6 +91,14 @@ public class LoginActivity extends RoboActivity {
                 attemptLogin();
             }
         });
+    }
+
+    private void initViews() {
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mPasswordView = (EditText) findViewById(R.id.password);
+        mProgressView = findViewById(R.id.login_progress);
+        mLoginFormView = findViewById(R.id.login_form);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
     }
 
 
@@ -124,7 +154,7 @@ public class LoginActivity extends RoboActivity {
             // perform the user login attempt.
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute((String) null);
         }
     }
 
@@ -163,11 +193,39 @@ public class LoginActivity extends RoboActivity {
         });
     }
 
+    private void finishLogin(Intent intent) {
+        Log.d(TAG, "Finishing login.");
+
+        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+        String accountPassword = intent.getStringExtra(AccountManager.KEY_PASSWORD);
+        final Account account = new Account(accountName, accountType);
+
+        if (getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false)) {
+            Log.d(TAG, "Account will be added explicitly.");
+            String authtoken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+            String authtokenType = authTokenType;
+
+            // Creating the account on the device and setting the auth token we got
+            // (Not setting the auth token will cause another call to the server to authenticate the user)
+            accountManager.addAccountExplicitly(account, accountPassword, null);
+            accountManager.setAuthToken(account, authtokenType, authtoken);
+        } else {
+            Log.d(TAG, "Account already present. Setting new password.");
+            accountManager.setPassword(account, accountPassword);
+        }
+
+        setAccountAuthenticatorResult(intent.getExtras());
+        setResult(RESULT_OK, intent);
+        Log.d(TAG, "Login successful.");
+        finish();
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<String, Void, Intent> {
 
         private final String mEmail;
         private final String mPassword;
@@ -178,22 +236,40 @@ public class LoginActivity extends RoboActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            return userDataService.login(mEmail, mPassword);
+        protected Intent doInBackground(String... params) {
+            Log.d(TAG, "Starting authentication");
+
+            Bundle data = new Bundle();
+            try {
+                Optional<String> tokenOptional = userDataService.login(mEmail, mPassword);
+                if (tokenOptional.isPresent()) {
+                    data.putString(AccountManager.KEY_ACCOUNT_NAME, mEmail);
+                    data.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+                    data.putString(AccountManager.KEY_AUTHTOKEN, tokenOptional.get());
+                    data.putString(AccountManager.KEY_PASSWORD, mPassword);
+                } else {
+                    throw new IOException("No token present.");
+                }
+            } catch (Exception e) {
+                data.putString(AccountManager.KEY_ERROR_MESSAGE, e.getMessage());
+            }
+
+            final Intent res = new Intent();
+            res.putExtras(data);
+            return res;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(Intent intent) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                Intent intent = new Intent(LoginActivity.this, FullscreenActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
+            if (intent.hasExtra(AccountManager.KEY_ERROR_MESSAGE)) {
+                Toast.makeText(getBaseContext(), intent.getStringExtra(AccountManager.KEY_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
+            } else {
+                finishLogin(intent);
             }
         }
 

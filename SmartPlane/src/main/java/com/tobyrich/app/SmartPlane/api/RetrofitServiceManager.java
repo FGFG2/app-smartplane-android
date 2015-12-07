@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.squareup.okhttp.Interceptor;
-import com.tobyrich.app.SmartPlane.api.model.Token;
 import com.tobyrich.app.SmartPlane.api.service.AchievementService;
 import com.tobyrich.app.SmartPlane.api.service.UserService;
 
@@ -54,7 +53,7 @@ public class RetrofitServiceManager {
         }
     }
 
-    public void registerSession(Token token) {
+    public void registerSession(String token) {
         authInterceptor.setToken(token);
     }
 }
