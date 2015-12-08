@@ -61,7 +61,7 @@ import android.widget.Toast;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.account.AccountConstants;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
-import com.tobyrich.app.SmartPlane.dispatcher.DataDispatcher;
+import com.tobyrich.app.SmartPlane.dispatcher.AchievementController;
 import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
@@ -105,7 +105,7 @@ public class FullscreenActivity extends RoboActivity {
     private SharedPreferences buttonConfig;  // cached button configuration
 
     @Inject
-    private DataDispatcher dataDispatcher;
+    private AchievementController achievementController;
     @Inject
     private AccountManager accountManager;
     @Inject
@@ -114,7 +114,7 @@ public class FullscreenActivity extends RoboActivity {
     @Override
     public void onStart() {
         super.onStart();
-        dataDispatcher.startAchievementMonitoring();
+        achievementController.startAchievementMonitoring();
         EventBus.getDefault().register(this);
     }
 

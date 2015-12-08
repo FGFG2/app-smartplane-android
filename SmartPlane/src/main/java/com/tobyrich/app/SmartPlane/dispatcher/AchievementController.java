@@ -12,7 +12,7 @@ import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
-public class DataDispatcher {
+public class AchievementController {
 
     public static final int MOTOR_BUFFER_SIZE = 20;
     public static final int RUDDER_BUFFER_SIZE = 50;
@@ -50,7 +50,7 @@ public class DataDispatcher {
         rudderMap = new LinkedHashMap<>();
         isConnectedMap = new LinkedHashMap<>();
         addRemainingDataFromDatabase();
-        achievementCheckerService.startAchievementMonitoring();
+        startListeningForNewAchievements();
     }
 
     /**
@@ -59,8 +59,8 @@ public class DataDispatcher {
     public void onEventBackgroundThread(ActivityStoppedEvent event) {
         sendDataIfBufferOverflow(true);
         couldNotSendPreviousData = false;
+        stopListeningForNewAchievements();
         EventBus.getDefault().unregister(this);
-        achievementCheckerService.stopAchievementMonitoring();
     }
 
     /**
@@ -154,6 +154,20 @@ public class DataDispatcher {
         if (isConnectedMap.size() >= IS_CONNECTED_BUFFER_SIZE || (ignoreBuffer && !isConnectedMap.isEmpty())) {
             isConnectedMap = sendDataService.sendData(isConnectedMap, ValueType.CONNECTION_STATE);
         }
+    }
+
+    /**
+     * Start scheduled task to check for new achievements in thread pool
+     */
+    private void startListeningForNewAchievements() {
+        achievementCheckerService.startAchievementMonitoring();
+    }
+
+    /**
+     * Stop scheduled task
+     */
+    private void stopListeningForNewAchievements() {
+        achievementCheckerService.stopAchievementMonitoring();
     }
 
     /**

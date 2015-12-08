@@ -34,10 +34,10 @@ import roboguice.inject.RoboInjector;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class)
-public class DataDispatcherTest extends TestCase {
+public class AchievementControllerTest extends TestCase {
 
     @Inject
-    private DataDispatcher classUnderTest;
+    private AchievementController classUnderTest;
 
     @Mock
     private SendDataService sendDataService;
@@ -56,7 +56,7 @@ public class DataDispatcherTest extends TestCase {
         RoboInjector injector = RoboGuice.getInjector(RuntimeEnvironment.application);
         injector.injectMembersWithoutViews(this);
 
-        // Init DataDispatcher
+        // Init AchievmentController
         classUnderTest.startAchievementMonitoring();
     }
 
@@ -83,9 +83,9 @@ public class DataDispatcherTest extends TestCase {
         Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
-        for (int i = 0; i < DataDispatcher.MOTOR_BUFFER_SIZE; i++) {
+        for (int i = 0; i < AchievementController.MOTOR_BUFFER_SIZE; i++) {
             // Wait to satisfy map precision --> one value per time in map
-            Thread.sleep(DataDispatcher.PRECISION);
+            Thread.sleep(AchievementController.PRECISION);
             MotorChangedEvent event = new MotorChangedEvent(Optional.of((short) i));
             classUnderTest.onEventBackgroundThread(event);
         }
@@ -101,9 +101,9 @@ public class DataDispatcherTest extends TestCase {
         Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
-        for (int i = 0; i < DataDispatcher.RUDDER_BUFFER_SIZE; i++) {
+        for (int i = 0; i < AchievementController.RUDDER_BUFFER_SIZE; i++) {
             // Wait to satisfy map precision --> one value per time in map
-            Thread.sleep(DataDispatcher.PRECISION);
+            Thread.sleep(AchievementController.PRECISION);
             RudderChangedEvent event = new RudderChangedEvent(Optional.of((short) i));
             classUnderTest.onEventBackgroundThread(event);
         }
@@ -119,9 +119,9 @@ public class DataDispatcherTest extends TestCase {
         Mockito.when(sendDataService.sendData(Mockito.anyMap(), Mockito.any(ValueType.class))).thenReturn(Collections.emptyMap());
 
         // When
-        for (int i = 0; i < DataDispatcher.IS_CONNECTED_BUFFER_SIZE; i++) {
+        for (int i = 0; i < AchievementController.IS_CONNECTED_BUFFER_SIZE; i++) {
             // Wait to satisfy map precision --> one value per time in map
-            Thread.sleep(DataDispatcher.PRECISION);
+            Thread.sleep(AchievementController.PRECISION);
             ConnectionStatusChangedEvent event = new ConnectionStatusChangedEvent(Optional.of(Boolean.TRUE));
             classUnderTest.onEventBackgroundThread(event);
         }
