@@ -61,7 +61,9 @@ public class RetrofitServiceManagerTest extends TestCase {
     @Test
     public void testGetAchievmentService() throws Exception {
         // Given
+        Optional<String> optional = Optional.of("123");
         Mockito.when(connectionManager.isNetworkAvailable()).thenReturn(Boolean.TRUE);
+        Mockito.when(authInterceptor.getToken()).thenReturn(optional);
 
         // When
         Optional<AchievementService> achievementServiceOptional = Optional.fromNullable(classUnderTest.getAchievmentService());
@@ -69,6 +71,7 @@ public class RetrofitServiceManagerTest extends TestCase {
         // Then
         assertTrue(achievementServiceOptional.isPresent());
         Mockito.verify(connectionManager).isNetworkAvailable();
+        Mockito.when(authInterceptor.getToken()).thenReturn(optional);
         Mockito.verify(connectionManager).getRetrofitConnection(Optional.of(authInterceptor));
     }
 
@@ -87,6 +90,27 @@ public class RetrofitServiceManagerTest extends TestCase {
         // Then
         assertFalse(achievementServiceOptional.isPresent());
         Mockito.verify(connectionManager).isNetworkAvailable();
+        Mockito.verify(connectionManager, Mockito.never()).getRetrofitConnection(Optional.<Interceptor>absent());
+    }
+
+    @Test
+    public void testGetAchievmentServiceNoToken() throws Exception {
+        // Given
+        Optional<String> optional = Optional.absent();
+        Mockito.when(connectionManager.isNetworkAvailable()).thenReturn(Boolean.TRUE);
+        Mockito.when(authInterceptor.getToken()).thenReturn(optional);
+        Optional<AchievementService> achievementServiceOptional = Optional.absent();
+
+        // When
+        try {
+            achievementServiceOptional = Optional.fromNullable(classUnderTest.getAchievmentService());
+        } catch (IOException ignored) {
+        }
+
+        // Then
+        assertFalse(achievementServiceOptional.isPresent());
+        Mockito.verify(connectionManager).isNetworkAvailable();
+        Mockito.verify(authInterceptor).getToken();
         Mockito.verify(connectionManager, Mockito.never()).getRetrofitConnection(Optional.<Interceptor>absent());
     }
 

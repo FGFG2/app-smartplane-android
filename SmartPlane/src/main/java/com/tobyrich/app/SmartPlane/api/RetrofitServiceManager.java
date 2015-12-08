@@ -29,7 +29,7 @@ public class RetrofitServiceManager {
     }
 
     public AchievementService getAchievmentService() throws IOException {
-        if (connectionManager.isNetworkAvailable()) {
+        if (connectionManager.isNetworkAvailable() && isTokenPresent()) {
             if (!achievementServiceOptional.isPresent()) {
                 final Optional<? extends Interceptor> interceptorOptional = Optional.fromNullable(authInterceptor);
                 achievementServiceOptional = Optional.fromNullable(connectionManager
@@ -37,7 +37,7 @@ public class RetrofitServiceManager {
             }
             return achievementServiceOptional.get();
         } else {
-            throw new IOException("No network connection present!");
+            throw new IOException("No network connection or OAuth token present!");
         }
     }
 
@@ -55,5 +55,9 @@ public class RetrofitServiceManager {
 
     public void registerSession(String token) {
         authInterceptor.setToken(token);
+    }
+
+    public Boolean isTokenPresent() {
+        return authInterceptor.getToken().isPresent();
     }
 }

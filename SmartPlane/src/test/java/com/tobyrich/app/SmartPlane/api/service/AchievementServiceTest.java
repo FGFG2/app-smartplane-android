@@ -44,6 +44,7 @@ public class AchievementServiceTest extends TestCase {
         injector.injectMembersWithoutViews(this);
 
         // Set up service
+        serviceManager.registerSession("Test123");
         achievementService = serviceManager.getAchievmentService();
     }
 
