@@ -1,7 +1,6 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
 import android.os.Handler;
-import android.os.StrictMode;
 import android.util.Log;
 
 import com.google.inject.Inject;
@@ -13,6 +12,8 @@ import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import de.greenrobot.event.EventBus;
 import retrofit.Call;
@@ -32,22 +33,25 @@ public class AchievementCheckerService {
     private List<Achievement> newAchievements;
     private List<Achievement> tmpAchievements;
 
-    public void startAchievementMonitoring(){
-        //TODO: Martin kannst du das fixen?
-        //Thread policy musste umgebogen werden, da internetzugriff im Mainthread passiert
-        //siehe: http://stackoverflow.com/questions/6976317/android-http-connection-exception/6986726#6986726
-        //und http://stackoverflow.com/questions/22395417/error-strictmodeandroidblockguardpolicy-onnetwork
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+    private ExecutorService executor;
 
-        handler = new Handler();
-        handler.postDelayed(runnable, DELAY);
+
+    /**
+     * Starts the periodically check for new Achievements
+     */
+    public void startAchievementMonitoring(){
+        executor = Executors.newFixedThreadPool(1);
+        executor.execute(runnable);
     }
 
     public void stopAchievementMonitoring(){
-        handler.removeCallbacks(runnable);
+        executor.shutdown();
+        executor.shutdownNow();
     }
 
+    /**
+     * Returns the list of obtained from server
+     * **/
     public List<Achievement> fetchAchievements(){
         final AchievementService achievementService;
         List<Achievement> achievementList = new ArrayList<Achievement>();
@@ -67,27 +71,37 @@ public class AchievementCheckerService {
         return achievementList;
     }
 
+    /**
+     * Runnable methode which fetches new achievements and compares them to the previous run
+     * if new achievement appears, create event for event bus
+     */
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            //Get achievements
-            newAchievements = fetchAchievements();
-            tmpAchievements = newAchievements;
+            while(!Thread.currentThread().isInterrupted()) {
+                //Get achievements
+                newAchievements = fetchAchievements();
+                tmpAchievements = new ArrayList<Achievement>(newAchievements);
 
-            //Find new ones
-            newAchievements.remove(currentAchievements);
+                //Find new ones
+                newAchievements.remove(currentAchievements);
 
-            //Create event if there is more than 0 new achievement
-            //current achievement initialized (not first run)
-            if (newAchievements.size() > 0 && !currentAchievements.equals(null)){
-                EventBus.getDefault().post(new AchievementUnlockedEvent(newAchievements));
+                //Create event if there is more than 0 new achievement
+                //current achievement initialized (not first run)
+                if (newAchievements.size() > 0 && !currentAchievements.equals(null)) {
+                    EventBus.getDefault().post(new AchievementUnlockedEvent(newAchievements));
+                }
+
+                //save achievements
+                currentAchievements = new ArrayList<Achievement>(tmpAchievements);
+
+                //wait delay time before xhecking again
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-
-            //save achievements
-            currentAchievements = tmpAchievements;
-
-            //do it again (loop)
-            handler.postDelayed(this, DELAY);
         }
     };
 
