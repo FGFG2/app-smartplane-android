@@ -29,9 +29,6 @@ import retrofit.Response;
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 
-/**
- * Created by anon on 03.12.2015.
- */
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class AchievementCheckerServiceTest extends TestCase {
@@ -69,7 +66,7 @@ public class AchievementCheckerServiceTest extends TestCase {
         //Given
         Mockito.when(retrofitServiceManager.getAchievmentService()).thenReturn(achievementService);
         Mockito.when(achievementService.getObtainedAchievements()).thenReturn(call);
-        List<Achievement> achievementList = new ArrayList<Achievement>();
+        List<Achievement> achievementList = new ArrayList<>();
         Response<List<Achievement>> response = Response.success(achievementList);
         Mockito.when(call.execute()).thenReturn(response);
         achievementList.add(new Achievement());
@@ -111,12 +108,6 @@ public class AchievementCheckerServiceTest extends TestCase {
         //Then
         assertTrue(resultList.isEmpty());
         Mockito.verify(call).execute();
-    }
-
-    //@Test
-    public void testAchievementMonitoringIntegrationTest() throws Exception {
-        classUnderTest.startAchievementMonitoring();
-        Thread.sleep(7000);
     }
 
     private class MyTestModule extends AbstractModule {
