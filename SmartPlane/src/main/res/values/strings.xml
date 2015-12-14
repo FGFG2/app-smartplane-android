@@ -156,4 +156,9 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="quit">Login cancellation</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="really_quit">All data will be saved locally. Hence your progress is assigned to the next logged in user.\n\nContinue without login?</string>
 </resources>
