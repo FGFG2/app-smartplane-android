@@ -44,7 +44,7 @@ public class AchievementServiceTest extends TestCase {
         injector.injectMembersWithoutViews(this);
 
         // Set up service
-        serviceManager.registerSession("Test123");
+        serviceManager.registerSession("b7aBPoj1AsO7qm07spgosrc9AXdwxFd7YqzMwJRN26qTiBek4gT79mFh9GD2pSCz8_ws1CFooFoeyUFtwUUMK-S82IsdjnMzxk7WqsCTTNLmJOkjV1D-rBiIt6LnTs7_3vpWLcdjPXejIYT639S0nORnT8qQ431bEc7AAfCzrFUUjAjRnLe1LgoV0a8oibpDcbHDZMC8Aw9dmWmoKk7lEJzrqAvzh_6Oy9LSbJjyXXTN2SzjeLD4AE22yXvfJNJbDzmQ0hMc2aHEJWTpbjNykxwzNsvoL2svdV9YLWdAHvqkXM8cNraIFvNdIUZafmZLzVsLnkaiWSIXJ1MX3HgR4uOOr74C3wpswR25gGNCiieh3HHj8L9WHZhuXhCbgODsuHq2AvJ-cpbvyICIkodzba3Odo7Q4ijUEpBAHrmA9kDa973ErrHVS7gE-pORFr_QNSPozauw9RK9QqykQzHvDdrb-fPwCIV-HLE6PQJJPC4");
         achievementService = serviceManager.getAchievmentService();
     }
 

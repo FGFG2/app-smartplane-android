@@ -5,6 +5,8 @@ import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -59,6 +61,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private View mProgressView;
     private View mLoginFormView;
     private Button mEmailSignInButton;
+    private Button mCancelButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,26 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 attemptLogin();
             }
         });
+
+        mCancelButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(LoginActivity.this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.quit)
+                        .setMessage(R.string.really_quit)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                LoginActivity.this.setResult(RESULT_CANCELED);
+                                LoginActivity.this.finish();
+                            }
+
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .show();
+            }
+        });
     }
 
     private void initViews() {
@@ -99,6 +122,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mProgressView = findViewById(R.id.login_progress);
         mLoginFormView = findViewById(R.id.login_form);
         mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mCancelButton = (Button) findViewById(R.id.cancel_button);
     }
 
 
