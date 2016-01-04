@@ -22,9 +22,14 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
 
     private final Context mContext;
     private String TAG = this.getClass().getSimpleName();
+
     @Inject
     private UserDataService userDataService;
 
+    @Inject
+    private AccountManager accountManager;
+
+    @Inject
     public SmartPlaneAuthenticator(Context context) {
         super(context);
         this.mContext = context;
@@ -37,71 +42,46 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
         Log.d(TAG, "Adding new account for SmartPlane.");
-
-        final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-        intent.putExtra(AccountManager.KEY_AUTHENTICATOR_TYPES, authTokenType);
-        intent.putExtra(LoginActivity.ARG_IS_ADDING_NEW_ACCOUNT, true);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-
-        final Bundle bundle = new Bundle();
-        bundle.putParcelable(AccountManager.KEY_INTENT, intent);
-        return bundle;
+        final Bundle result = new Bundle();
+        final Intent promptLogin = getIntentForLogin(response, accountType, authTokenType, Boolean.TRUE);
+        result.putParcelable(AccountManager.KEY_INTENT, promptLogin);
+        return result;
     }
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
         Log.d(TAG, "Getting token for SmartPlane account.");
+        String authToken;
+        final Bundle result = new Bundle();
 
         // Only supported authToken types allowed --> else return error
         if (!authTokenType.equals(AccountConstants.AUTHTOKEN_TYPE_READ_ONLY) && !authTokenType.equals(AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS)) {
-            final Bundle result = new Bundle();
+            Log.w(TAG, "Token type not supported: " + authTokenType);
             result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
-            return result;
-        }
+        } else {
+            // Get cached auth token from account manager
+            authToken = accountManager.peekAuthToken(account, authTokenType);
+            Log.d(TAG, "Token peek returned: " + authToken);
 
-        final AccountManager am = AccountManager.get(mContext);
+            // If not token --> lets give another try to authenticate the user with cached user credentials
+            if (TextUtils.isEmpty(authToken)) {
+                authToken = reauthenticateAccount(account.name, accountManager.getPassword(account));
+            }
 
-        // Get cached auth token from account manager
-        String authToken = am.peekAuthToken(account, authTokenType);
-
-        Log.d(TAG, "Token peek returned: " + authToken);
-
-        // If not token --> lets give another try to authenticate the user with cached user credentials
-        if (TextUtils.isEmpty(authToken)) {
-            final String password = am.getPassword(account);
-            if (password != null) {
-                try {
-                    Log.d(TAG, "Got no token from peak -->  re-authenticating with the existing password");
-                    Optional<String> tokenOptional = userDataService.login(account.name, password);
-                    if (tokenOptional.isPresent()) {
-                        authToken = tokenOptional.get();
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, "Could not re-authenticate --> Re-prompt for user credentials", e);
-                }
+            // On success return token
+            if (!TextUtils.isEmpty(authToken)) {
+                Log.d(TAG, "Got token from user service: " + authToken);
+                result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+                result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+                result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+            } else {
+                // Re-prompt to LoginActivity if we still got no token --> re-enter credentials
+                Log.d(TAG, "Still no token --> re-prompting to enter authentication information.");
+                final Intent promptLogin = getIntentForLogin(response, account.type, authTokenType, Boolean.FALSE);
+                result.putParcelable(AccountManager.KEY_INTENT, promptLogin);
             }
         }
-
-        // On success return token
-        if (!TextUtils.isEmpty(authToken)) {
-            Log.d(TAG, "Got token from user service: " + authToken);
-            final Bundle result = new Bundle();
-            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
-            result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
-            return result;
-        }
-
-        // Re-prompt to LoginActivity if we still got no token --> re-enter credentials
-        Log.d(TAG, "Still no token --> re-prompting to enter authentication information.");
-        final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, account.type);
-        intent.putExtra(AccountManager.KEY_AUTHENTICATOR_TYPES, authTokenType);
-        final Bundle bundle = new Bundle();
-        bundle.putParcelable(AccountManager.KEY_INTENT, intent);
-        return bundle;
+       return result;
     }
 
 
@@ -135,6 +115,31 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
         return null;
+    }
+
+    private Intent getIntentForLogin(AccountAuthenticatorResponse response, String accountType, String authTokenType, Boolean isNewAccount) {
+        final Intent intent = new Intent(mContext, LoginActivity.class);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+        intent.putExtra(AccountManager.KEY_AUTHENTICATOR_TYPES, authTokenType);
+        intent.putExtra(LoginActivity.ARG_IS_ADDING_NEW_ACCOUNT, isNewAccount);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+        return intent;
+    }
+
+    /* package */String reauthenticateAccount(String accountName, String accountPassword) {
+        String authToken = "";
+        if (accountPassword != null) {
+            try {
+                Log.d(TAG, "Got no token from peak -->  re-authenticating with the existing password");
+                Optional<String> tokenOptional = userDataService.login(accountName, accountPassword);
+                if (tokenOptional.isPresent()) {
+                    authToken = tokenOptional.get();
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Could not re-authenticate --> Re-prompt for user credentials", e);
+            }
+        }
+        return authToken;
     }
 
 }
