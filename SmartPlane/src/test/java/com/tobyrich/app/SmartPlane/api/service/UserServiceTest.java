@@ -48,7 +48,7 @@ public class UserServiceTest extends TestCase {
     @Test
     public void testLogin() throws Exception {
         // Given
-        String mail = "test@test.rocks";
+        String mail = "msuckau@fgfg.de";
         String pw = "test123";
 
         // When

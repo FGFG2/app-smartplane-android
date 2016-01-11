@@ -34,7 +34,7 @@ import roboguice.inject.RoboInjector;
 
 
 /**
- * A login screen that offers login via email/password.
+ * Login screen that offers login via email/password to server
  */
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -43,7 +43,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     /**
-     * Keep track of the login task to ensure we can cancel it if requested.
+     * Keep track of the login task to ensure we can cancel it if requested
      */
     private UserLoginTask mAuthTask = null;
     private String authTokenType;
@@ -55,7 +55,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private AccountManager accountManager;
 
 
-    // UI references.
+    // UI references
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -63,21 +63,51 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private Button mEmailSignInButton;
     private Button mCancelButton;
 
+    @Inject
+    public LoginActivity() {
+    }
+
+    /* package */LoginActivity(AutoCompleteTextView emailView, EditText passwordView) {
+        mEmailView = emailView;
+        mPasswordView = passwordView;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Perform dependency injection
         final RoboInjector injector = RoboGuice.getInjector(this.getApplicationContext());
         injector.injectMembersWithoutViews(this);
 
+        // Get account and token type from intent
         accountType = getIntent().getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
         authTokenType = getIntent().getStringExtra(AccountManager.KEY_AUTHENTICATOR_TYPES);
         if (authTokenType == null) {
             authTokenType = AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS;
         }
         initViews();
+        initListeners();
+    }
 
+    /**
+     * Initialize all views
+     * --> IOC-Container can not perform view injection due to inheritance problem
+     */
+    private void initViews() {
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mPasswordView = (EditText) findViewById(R.id.password);
+        mProgressView = findViewById(R.id.login_progress);
+        mLoginFormView = findViewById(R.id.login_form);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mCancelButton = (Button) findViewById(R.id.cancel_button);
+    }
+
+    /**
+     * Add listeners to buttons
+     */
+    private void initListeners() {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -116,84 +146,91 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
     }
 
-    private void initViews() {
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mProgressView = findViewById(R.id.login_progress);
-        mLoginFormView = findViewById(R.id.login_form);
-        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mCancelButton = (Button) findViewById(R.id.cancel_button);
-    }
-
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to sign in the account specified by the login form
+     *
      * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
+     * errors are presented and no actual login attempt is made
      */
     private void attemptLogin() {
         if (mAuthTask != null) {
+            // other login still in progress --> return
             return;
         }
 
-        // Reset errors.
+        // Reset errors
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values at the time of the login attempt
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password.
-        if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView;
+        if (!isEmailValid(email)) {
             cancel = true;
-        } else if (!isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
+            focusView = mEmailView;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+        if (!isPasswordValid(password)) {
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
+            focusView = mPasswordView;
         }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
-            // form field with an error.
+            // form field with an error
             focusView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // perform the user login attempt
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((String) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
-        //TODO: Add further validation
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Add further validation
-        return password.length() > 4;
+    /**
+     * Check for a valid email address
+     *
+     * @param email Account email address
+     * @return Valid?
+     */
+    /* package */boolean isEmailValid(String email) {
+        if (TextUtils.isEmpty(email)) {
+            mEmailView.setError(getString(R.string.error_field_required));
+            return false;
+        } else if (!email.contains("@")) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
-     * Shows the progress UI and hides the login form.
+     * Check for a valid password
+     *
+     * @param password Account password
+     * @return Valid?
+     */
+    /* package */boolean isPasswordValid(String password) {
+        if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            return false;
+        } else if (password.length() < 4) {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Shows the progress UI and hides the login form
      */
     private void showProgress(final boolean show) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -217,21 +254,27 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
     }
 
-    private void finishLogin(Intent intent) {
+    /**
+     * Register or update account after successful login and inform AccountManager
+     *
+     * @param intent Account information
+     */
+    /* package */void finishLogin(Intent intent) {
         Log.d(TAG, "Finishing login.");
 
+        // Get account information from intent (from login task)
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
         String accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
         String accountPassword = intent.getStringExtra(AccountManager.KEY_PASSWORD);
         final Account account = new Account(accountName, accountType);
 
+        // Add new account if intended, otherwise change cached password
         if (getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false)) {
             Log.d(TAG, "Account will be added explicitly.");
             String authtoken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
             String authtokenType = authTokenType;
 
-            // Creating the account on the device and setting the auth token we got
-            // (Not setting the auth token will cause another call to the server to authenticate the user)
+            // Creating the account on the device and setting the auth token
             accountManager.addAccountExplicitly(account, accountPassword, null);
             accountManager.setAuthToken(account, authtokenType, authtoken);
         } else {
@@ -239,6 +282,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             accountManager.setPassword(account, accountPassword);
         }
 
+        // Set result in activity and inform AccountManager
         setAccountAuthenticatorResult(intent.getExtras());
         setResult(RESULT_OK, intent);
         Log.d(TAG, "Login successful.");
@@ -246,7 +290,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     /**
-     * Represents an asynchronous login/registration task used to authenticate
+     * Represents an asynchronous login task used to authenticate
      * the user.
      */
     public class UserLoginTask extends AsyncTask<String, Void, Intent> {
@@ -259,6 +303,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             mPassword = password;
         }
 
+        /**
+         * Perform login via UserDataService to get valid auth token for passed credentials
+         *
+         * @param params Ignored
+         * @return Intent with account information
+         */
         @Override
         protected Intent doInBackground(String... params) {
             Log.d(TAG, "Starting authentication");
@@ -267,6 +317,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             try {
                 Optional<String> tokenOptional = userDataService.login(mEmail, mPassword);
                 if (tokenOptional.isPresent()) {
+                    // Set account information
                     data.putString(AccountManager.KEY_ACCOUNT_NAME, mEmail);
                     data.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
                     data.putString(AccountManager.KEY_AUTHTOKEN, tokenOptional.get());
@@ -283,20 +334,30 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             return res;
         }
 
+        /**
+         * Read intent to evaluate login information
+         *
+         * @param intent Intent from login progress
+         */
         @Override
         protected void onPostExecute(Intent intent) {
             mAuthTask = null;
             showProgress(false);
 
             if (intent.hasExtra(AccountManager.KEY_ERROR_MESSAGE)) {
+                // Display error and request focus on error field
                 Toast.makeText(getBaseContext(), intent.getStringExtra(AccountManager.KEY_ERROR_MESSAGE), Toast.LENGTH_SHORT).show();
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             } else {
+                // Login successful
                 finishLogin(intent);
             }
         }
 
+        /**
+         * Cancel login and clean up
+         */
         @Override
         protected void onCancelled() {
             mAuthTask = null;
