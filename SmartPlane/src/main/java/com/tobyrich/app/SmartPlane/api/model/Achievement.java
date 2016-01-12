@@ -1,5 +1,7 @@
 package com.tobyrich.app.SmartPlane.api.model;
 
+import com.google.common.base.Objects;
+
 public class Achievement {
     private String Description;
     private int Id;
@@ -45,5 +47,18 @@ public class Achievement {
 
     public void setProgress(int progress) {
         Progress = progress;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Achievement)) return false;
+        Achievement that = (Achievement) o;
+        return Objects.equal(Id, that.Id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(Id);
     }
 }

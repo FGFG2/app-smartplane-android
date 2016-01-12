@@ -22,7 +22,7 @@ import retrofit.Response;
 
 public class AchievementCheckerService {
 
-    public static final int DELAY = 30;
+    public static final int DELAY = 15;
     @Inject
     private RetrofitServiceManager retrofitServiceManager;
     private List<Achievement> currentAchievements;
@@ -44,11 +44,10 @@ public class AchievementCheckerService {
             //Create event if there is more than 0 new achievement
             //current achievement initialized (not first run)
             if (!newAchievements.isEmpty()) {
+                //save achievements for next check
+                currentAchievements = new ArrayList<>(tmpAchievements);
                 EventBus.getDefault().post(new AchievementUnlockedEvent(newAchievements));
             }
-
-            //save achievements for next check
-            currentAchievements = new ArrayList<>(tmpAchievements);
         }
     };
 
@@ -60,11 +59,11 @@ public class AchievementCheckerService {
             @Override
             protected Void doInBackground(Void... voids) {
                 currentAchievements = fetchAchievements();
+                executor = Executors.newScheduledThreadPool(1);
+                executor.scheduleAtFixedRate(runnable, DELAY, DELAY, TimeUnit.SECONDS);
                 return null;
             }
         }.execute((Void) null);
-        executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(runnable, DELAY, DELAY, TimeUnit.SECONDS);
     }
 
     public void stopAchievementMonitoring(){

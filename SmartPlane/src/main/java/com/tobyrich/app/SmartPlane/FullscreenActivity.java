@@ -32,6 +32,9 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -43,6 +46,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -62,6 +66,7 @@ import android.widget.Toast;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.account.AccountConstants;
 import com.tobyrich.app.SmartPlane.api.RetrofitServiceManager;
+import com.tobyrich.app.SmartPlane.api.model.Achievement;
 import com.tobyrich.app.SmartPlane.dispatcher.AchievementController;
 import com.tobyrich.app.SmartPlane.dispatcher.event.AchievementUnlockedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
@@ -115,7 +120,6 @@ public class FullscreenActivity extends RoboActivity {
     @Override
     public void onStart() {
         super.onStart();
-        achievementController.startAchievementMonitoring();
         EventBus.getDefault().register(this);
     }
 
@@ -402,7 +406,41 @@ public class FullscreenActivity extends RoboActivity {
     public void onEventMainThread(AchievementUnlockedEvent event){
         // Vibrate for haptic feedback
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(200);
+        vibrator.vibrate(500);
+
+        // Build string to inform user about which achievement was unlocked
+        String achievementString = "";
+        for (Achievement achievement : event.getNewAchievements()) {
+            achievementString += achievement.getName() + ", ";
+        }
+        achievementString = achievementString.substring(0, achievementString.length() - 2);
+
+        // Build notification
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("New achievement unlocked !")
+                        .setContentText("You have unlocked: " + achievementString);
+
+        // Get intent from package manager to start hangar app
+        Intent notificationIntent = getPackageManager().getLaunchIntentForPackage("com.tobyrich.dev.com.tobyrich.dev.hangarapp.lib");
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        // Build new stack to provide proper navigation
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(notificationIntent.getComponent());
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // Extract pending intent for activity change
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        // Show notification
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(0, mBuilder.build());
     }
 
     /**
@@ -419,9 +457,14 @@ public class FullscreenActivity extends RoboActivity {
                     public void run(AccountManagerFuture<Bundle> future) {
                         try {
                             Bundle bnd = future.getResult();
+                            // Register user token
                             final String authtoken = bnd.getString(AccountManager.KEY_AUTHTOKEN);
                             serviceManager.registerSession(authtoken);
-                            Log.d(TAG, "Got token --> Successfully authenticated: " + bnd);
+                            Log.d(TAG, "Got token --> Successfully authenticated and registered");
+
+                            // Start monitoring
+                            achievementController.startAchievementMonitoring();
+
                         } catch (OperationCanceledException e) {
                             Log.i(TAG, "User canceled login --> no token present for data sending");
                         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
+import android.util.Log;
+
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.dispatcher.event.ActivityStoppedEvent;
 import com.tobyrich.app.SmartPlane.dispatcher.event.connection.DataNotSendEvent;
@@ -18,19 +20,15 @@ public class AchievementController {
     public static final int RUDDER_BUFFER_SIZE = 50;
     public static final int IS_CONNECTED_BUFFER_SIZE = 2;
     public static final int PRECISION = 100; // Precision of time in maps --> 1 = ms, 1000 = s, 60000 = min ...
-
+    private final String TAG = this.getClass().getSimpleName();
     private Map<Long, Object> motorMap;
     private Map<Long, Object> rudderMap;
     private Map<Long, Object> isConnectedMap;
-
     private boolean couldNotSendPreviousData = false;
-
     @Inject
     private SendDataService sendDataService;
-
     @Inject
     private PersistDataService persistDataService;
-
     @Inject
     private AchievementCheckerService achievementCheckerService;
 
@@ -51,6 +49,7 @@ public class AchievementController {
         isConnectedMap = new LinkedHashMap<>();
         addRemainingDataFromDatabase();
         startListeningForNewAchievements();
+        Log.i(TAG, "Started monitoring.");
     }
 
     /**
@@ -61,6 +60,7 @@ public class AchievementController {
         couldNotSendPreviousData = false;
         stopListeningForNewAchievements();
         EventBus.getDefault().unregister(this);
+        Log.i(TAG, "Stopped monitoring.");
     }
 
     /**
