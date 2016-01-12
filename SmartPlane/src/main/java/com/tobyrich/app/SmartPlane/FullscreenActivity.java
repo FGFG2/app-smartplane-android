@@ -376,15 +376,31 @@ public class FullscreenActivity extends RoboActivity {
         flAssistSwitch.setChecked(enableFlAssist);
     }
 
+    /**
+     * Inform user that service could not send data
+     *
+     * @param event DataNotSendEvent
+     */
     public void onEventMainThread(DataNotSendEvent event) {
         Toast.makeText(this, event.getReason(), Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Inform user that server successfully send data
+     *
+     * @param event DataSendEvent
+     */
     public void onEventMainThread(DataSendEvent event) {
         Toast.makeText(this, event.getType().name() + " data successfully send to server.", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Inform user about new unlocked achievement
+     *
+     * @param event AchievementUnlockedEvent
+     */
     public void onEventMainThread(AchievementUnlockedEvent event){
+        // Vibrate for haptic feedback
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(200);
     }

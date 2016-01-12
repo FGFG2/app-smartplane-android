@@ -1,5 +1,6 @@
 package com.tobyrich.app.SmartPlane.dispatcher;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.inject.Inject;
@@ -55,7 +56,13 @@ public class AchievementCheckerService {
      * Starts periodical check for new Achievements
      */
     public void startAchievementMonitoring(){
-        currentAchievements = fetchAchievements();
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                currentAchievements = fetchAchievements();
+                return null;
+            }
+        }.execute((Void) null);
         executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(runnable, DELAY, DELAY, TimeUnit.SECONDS);
     }
