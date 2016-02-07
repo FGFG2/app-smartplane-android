@@ -20,13 +20,18 @@ import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Response;
 
+/**
+ * Service to periodically check if user got new achievement
+ */
 public class AchievementCheckerService {
 
     public static final int DELAY = 15;
+
     @Inject
     private RetrofitServiceManager retrofitServiceManager;
     private List<Achievement> currentAchievements;
     private ScheduledExecutorService executor;
+
     /**
      * Runnable fetch new achievements and compare them to the previous ones
      * if new achievement present, create event to notify activity
@@ -52,7 +57,8 @@ public class AchievementCheckerService {
     };
 
     /**
-     * Starts periodical check for new Achievements
+     * Starts periodical check for new achievements
+     * Check is always asynchronous
      */
     public void startAchievementMonitoring(){
         new AsyncTask<Void, Void, Void>() {
@@ -71,7 +77,7 @@ public class AchievementCheckerService {
     }
 
     /**
-     * Returns the list of obtained from server
+     * Returns the list of obtained achievements from server
      */
     /* package */List<Achievement> fetchAchievements() {
         final AchievementService achievementService;

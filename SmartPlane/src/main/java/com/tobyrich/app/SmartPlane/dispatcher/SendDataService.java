@@ -16,6 +16,9 @@ import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Response;
 
+/**
+ * Service to send achievement related data from any map to server
+ */
 public class SendDataService {
 
     private static final String TYPE_PLACEHOLDER = "TYPE";
@@ -24,6 +27,10 @@ public class SendDataService {
     @Inject
     private RetrofitServiceManager retrofitServiceManager;
 
+    /**
+     * Init data dispatching and handles response or exception from retrofit service
+     * Call is always executed in current thread (synchronously)
+     */
     public <S, T> Map<S, T> sendData(Map<S, T> map, ValueType type) {
         try {
             Call<String> call = dispatchData(map, type);
@@ -37,6 +44,9 @@ public class SendDataService {
         }
     }
 
+    /**
+     * Uses retrofit services to send data from map to server
+     */
     private <S, T> Call<String> dispatchData(Map<S, T> map, ValueType type) throws IOException {
         final AchievementService achievementService = retrofitServiceManager.getAchievmentService();
         Call<String> call = null;
@@ -54,6 +64,10 @@ public class SendDataService {
         return call;
     }
 
+    /**
+     * Handles response from server (from retrofit service)
+     * and dispatches events depending on result of call
+     */
     private <S, T, U> Map<S, T> handleResponse(Optional<Response<U>> response, Map<S, T> map, ValueType type) {
         if (response.isPresent() && response.get().isSuccess()) {
             map.clear();

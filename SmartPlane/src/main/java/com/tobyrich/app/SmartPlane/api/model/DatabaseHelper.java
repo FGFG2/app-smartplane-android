@@ -7,9 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.google.inject.Inject;
 import com.tobyrich.app.SmartPlane.R;
 
-/**
- * Created by anon on 02.11.2015.
- */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 

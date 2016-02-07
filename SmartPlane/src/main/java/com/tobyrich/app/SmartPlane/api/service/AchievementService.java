@@ -10,6 +10,9 @@ import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.POST;
 
+/**
+ * Interface for achievement related communication with server (Retrofit)
+ */
 public interface AchievementService {
     @GET("api/AllAchievements")
     Call<List<Achievement>> getAllAchievements();

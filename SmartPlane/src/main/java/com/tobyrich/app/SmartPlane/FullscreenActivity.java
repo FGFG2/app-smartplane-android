@@ -118,20 +118,6 @@ public class FullscreenActivity extends RoboActivity {
     private RetrofitServiceManager serviceManager;
 
     @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        bluetoothDelegate.disconnect();
-        EventBus.getDefault().post(new ActivityStoppedEvent());
-        EventBus.getDefault().unregister(this);
-        super.onStop();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
 
@@ -160,29 +146,6 @@ public class FullscreenActivity extends RoboActivity {
         if (sensorHandler != null) {
             sensorHandler.unregisterListener();
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        bluetoothDelegate = new BluetoothDelegate(this);
-        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-
-        // Instantiate a ViewPager and a PagerAdapter
-        ViewPager screenPager = (ViewPager) findViewById(R.id.screenPager);
-        screenPager.setAdapter(new ScreenSlideAdapter());
-
-        CirclePageIndicator screenIndicator =
-                (CirclePageIndicator) findViewById(R.id.screenIndicator);
-        screenIndicator.setViewPager(screenPager);
-
-        screenPager.setCurrentItem(1);  // horizon screen
-        screenPager.setOffscreenPageLimit(2);
-
-        buttonConfig = this.getSharedPreferences("button_config", MODE_PRIVATE);
-
-        // Authenticate user --> get token
-        getTokenForAccountCreateIfNeeded(AccountConstants.ACCOUNT_TYPE, AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS);
     }
 
     /**
@@ -226,21 +189,6 @@ public class FullscreenActivity extends RoboActivity {
                 // noinspection UnnecessaryReturnStatement
                 return;
         }  // end switch
-    }
-
-    @Override
-    public void onBackPressed() { //change functionality of back button
-        new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.exitConfirmationMsg))
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        //This resets all cached data from the app and breaks the connection.
-                        //The app itself is only minimized, but not closed.
-                        FullscreenActivity.this.finish();
-                    }
-                }).create().show();
     }
 
     /**
@@ -378,6 +326,62 @@ public class FullscreenActivity extends RoboActivity {
         boolean enableFlAssist = buttonConfig.getBoolean("flAssist",
                 Const.DEFAULT_FLIGHT_ASSIST);
         flAssistSwitch.setChecked(enableFlAssist);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        bluetoothDelegate = new BluetoothDelegate(this);
+        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+
+        // Instantiate a ViewPager and a PagerAdapter
+        ViewPager screenPager = (ViewPager) findViewById(R.id.screenPager);
+        screenPager.setAdapter(new ScreenSlideAdapter());
+
+        CirclePageIndicator screenIndicator =
+                (CirclePageIndicator) findViewById(R.id.screenIndicator);
+        screenIndicator.setViewPager(screenPager);
+
+        screenPager.setCurrentItem(1);  // horizon screen
+        screenPager.setOffscreenPageLimit(2);
+
+        buttonConfig = this.getSharedPreferences("button_config", MODE_PRIVATE);
+
+        // Authenticate user --> get token
+        getTokenForAccountCreateIfNeeded(AccountConstants.ACCOUNT_TYPE, AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS);
+    }
+
+    // ############################################################################################
+    // ################### New code related to achievement add-on for app #########################
+    // ############################################################################################
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        bluetoothDelegate.disconnect();
+        EventBus.getDefault().post(new ActivityStoppedEvent());
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Override
+    public void onBackPressed() { //change functionality of back button
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.exitConfirmationMsg))
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        //This resets all cached data from the app and breaks the connection.
+                        //The app itself is only minimized, but not closed.
+                        FullscreenActivity.this.finish();
+                    }
+                }).create().show();
     }
 
     /**
@@ -542,6 +546,5 @@ public class FullscreenActivity extends RoboActivity {
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
         }
-
     }
 }

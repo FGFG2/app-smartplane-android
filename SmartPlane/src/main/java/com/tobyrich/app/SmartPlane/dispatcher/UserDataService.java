@@ -12,6 +12,9 @@ import java.io.IOException;
 
 import retrofit.Response;
 
+/**
+ * Service to login user to server (get O-Auth token)
+ */
 public class UserDataService {
 
     public static final String GRANT_TYPE = "password";
@@ -19,6 +22,10 @@ public class UserDataService {
     @Inject
     private RetrofitServiceManager serviceManager;
 
+    /**
+     * Tries to get O-Auth token from server using retrofit user service
+     * If no token present absent optional is returned
+     */
     public Optional<String> login(String email, String password) {
         try {
             UserService userService = serviceManager.getUserService();

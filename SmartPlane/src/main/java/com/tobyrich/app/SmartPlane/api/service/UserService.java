@@ -7,6 +7,9 @@ import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
+/**
+ * Interface for user related communication with server (Retrofit)
+ */
 public interface UserService {
     @FormUrlEncoded
     @POST("token")

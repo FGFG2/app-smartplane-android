@@ -34,18 +34,18 @@ import roboguice.inject.RoboInjector;
 
 
 /**
- * Login screen that offers login via email/password to server
+ * Class provides login screen that offers login via email/password to server
  */
 public class LoginActivity extends AccountAuthenticatorActivity {
 
-    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
-
+    public static final String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
     private final String TAG = this.getClass().getSimpleName();
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested
      */
     private UserLoginTask mAuthTask = null;
+
     private String authTokenType;
     private String accountType;
 
@@ -67,6 +67,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public LoginActivity() {
     }
 
+    /**
+     * Constructor for test
+     *
+     * @param emailView    text field for email
+     * @param passwordView text field for password
+     */
     /* package */LoginActivity(AutoCompleteTextView emailView, EditText passwordView) {
         mEmailView = emailView;
         mPasswordView = passwordView;
@@ -94,6 +100,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     /**
      * Initialize all views
      * --> IOC-Container can not perform view injection due to inheritance problem
+     * (class needs to inherit AccountAuthenticatorActivity)
      */
     private void initViews() {
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -125,6 +132,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             }
         });
 
+        // create alert to inform user about cancel action
         mCancelButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {

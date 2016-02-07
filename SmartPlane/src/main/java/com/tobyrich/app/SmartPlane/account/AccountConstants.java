@@ -1,5 +1,8 @@
 package com.tobyrich.app.SmartPlane.account;
 
+/**
+ * Class holds all external constants for account management
+ */
 public class AccountConstants {
 
     public static final String ACCOUNT_TYPE = "com.tobyrich.app.SmartPlane";

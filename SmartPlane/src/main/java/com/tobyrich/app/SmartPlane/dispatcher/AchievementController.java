@@ -14,6 +14,9 @@ import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
+/**
+ * Controller to manage all achievement data and achievement related events
+ */
 public class AchievementController {
 
     public static final int MOTOR_BUFFER_SIZE = 20;
@@ -24,7 +27,9 @@ public class AchievementController {
     private Map<Long, Object> motorMap;
     private Map<Long, Object> rudderMap;
     private Map<Long, Object> isConnectedMap;
+
     private boolean couldNotSendPreviousData = false;
+
     @Inject
     private SendDataService sendDataService;
     @Inject
@@ -131,7 +136,7 @@ public class AchievementController {
     }
 
     /**
-     * Gets remaining (not send) data from local database and tries to send it
+     * Gets remaining (not send) data from local database and add data to particular map
      */
     private void addRemainingDataFromDatabase() {
         motorMap.putAll(persistDataService.getAllData(ValueType.MOTOR));

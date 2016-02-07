@@ -13,6 +13,9 @@ import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
 
+/**
+ * Manager to handle connection to server
+ */
 @Singleton
 public class ConnectionManager {
 
@@ -25,9 +28,10 @@ public class ConnectionManager {
     @Inject
     private OkHttpClient httpClient;
 
-    public ConnectionManager() {
-    }
-
+    /**
+     * Returns Retrofit connection to server (lazy initialization)
+     * Uses passed interceptor to intercept request if present
+     */
     public Retrofit getRetrofitConnection(Optional<? extends Interceptor> interceptor) {
         httpClient.interceptors().clear();
         if (interceptor.isPresent()) {
@@ -44,6 +48,9 @@ public class ConnectionManager {
         return retrofitOptional.get();
     }
 
+    /**
+     * Checks if working connection to the internet is present using android managers
+     */
     public boolean isNetworkAvailable() {
         Optional<NetworkInfo> activeNetworkInfo = Optional.fromNullable(connectivityManager.getActiveNetworkInfo());
         return activeNetworkInfo.isPresent() && activeNetworkInfo.get().isConnected();

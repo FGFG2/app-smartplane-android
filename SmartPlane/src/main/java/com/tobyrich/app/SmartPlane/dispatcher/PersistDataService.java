@@ -10,8 +10,15 @@ import com.tobyrich.app.SmartPlane.api.model.DatabaseHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Service to save and load achievement related data to/from local SQLite database
+ * using android SQLiteOpenHelper and android SQLiteDatabase
+ * <p/>
+ * Service behaves like local cache of achievement related data
+ */
 public class PersistDataService {
     private SQLiteDatabase connection;
+
     @Inject
     private DatabaseHelper databasehelper;
 
@@ -20,6 +27,9 @@ public class PersistDataService {
         this.databasehelper = databasehelper;
     }
 
+    /**
+     * Save data of given typ to local database
+     */
     public void saveData(ValueType type, Map<Long, Object> map) {
         connection = databasehelper.getWritableDatabase();
         String insertStatement = "";
@@ -49,7 +59,9 @@ public class PersistDataService {
         connection.close();
     }
 
-
+    /**
+     * Load all data of given typ from local database and delete all loaded data afterwards
+     */
     public Map<Long, Object> getAllData(ValueType type) {
         connection = databasehelper.getWritableDatabase();
         Map<Long, Object> resultMap = new LinkedHashMap<>();

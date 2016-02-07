@@ -39,6 +39,10 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
         injector.injectMembersWithoutViews(this);
     }
 
+    /**
+     * Creates intent for LoginActivity to allow login using user credentials
+     * Called by android account manager
+     */
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
         Log.d(TAG, "Adding new account for SmartPlane.");
@@ -48,6 +52,13 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
         return result;
     }
 
+    /**
+     * Gets O-Auth token for specific account:
+     * 1: Tries to get cached token
+     * 2: Tries to reuse cached user credentials to login user automatically
+     * 3: Prompts LoginActivity if everything else failed
+     * Called by android account manager
+     */
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
         Log.d(TAG, "Getting token for SmartPlane account.");
@@ -85,6 +96,9 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
     }
 
 
+    /**
+     * Provides account label for android account manager (shown in account settings)
+     */
     @Override
     public String getAuthTokenLabel(String authTokenType) {
         if (AccountConstants.AUTHTOKEN_TYPE_FULL_ACCESS.equals(authTokenType))
@@ -95,6 +109,9 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
             return authTokenType + " (Label)";
     }
 
+    /**
+     * Tells android account manager that account has not features (e.g. settings / properties)
+     */
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
         final Bundle result = new Bundle();
@@ -117,6 +134,9 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
+    /**
+     * Creates login intent
+     */
     private Intent getIntentForLogin(AccountAuthenticatorResponse response, String accountType, String authTokenType, Boolean isNewAccount) {
         final Intent intent = new Intent(mContext, LoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
@@ -126,6 +146,9 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
         return intent;
     }
 
+    /**
+     * Tries to reauthenticate user against server
+     */
     /* package */String reauthenticateAccount(String accountName, String accountPassword) {
         String authToken = "";
         if (accountPassword != null) {
@@ -141,5 +164,4 @@ public class SmartPlaneAuthenticator extends AbstractAccountAuthenticator {
         }
         return authToken;
     }
-
 }

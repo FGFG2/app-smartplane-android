@@ -8,16 +8,15 @@ import com.tobyrich.app.SmartPlane.api.service.AchievementService;
 import com.tobyrich.app.SmartPlane.api.service.UserService;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * Manager to handle all retrofit services for communication with server
+ */
 @Singleton
 public class RetrofitServiceManager {
 
     private Optional<AchievementService> achievementServiceOptional = Optional.absent();
     private Optional<UserService> userServiceOptional = Optional.absent();
-
-    private Map<Class, Object> serviceMap = new HashMap<>();
 
     @Inject
     private ConnectionManager connectionManager;
@@ -25,9 +24,11 @@ public class RetrofitServiceManager {
     @Inject
     private AuthInterceptor authInterceptor;
 
-    public RetrofitServiceManager() {
-    }
-
+    /**
+     * Returns achievement related service for communication with server (lazy initialization)
+     * Uses Retrofit connection of ConnectionManager
+     * (Passes interceptor to ConnectionManager)
+     */
     public AchievementService getAchievmentService() throws IOException {
         if (connectionManager.isNetworkAvailable() && isTokenPresent()) {
             if (!achievementServiceOptional.isPresent()) {
@@ -41,6 +42,11 @@ public class RetrofitServiceManager {
         }
     }
 
+    /**
+     * Returns user related service for communication with server (lazy initialization)
+     * Uses Retrofit connection of ConnectionManager
+     * (no interceptor needed)
+     */
     public UserService getUserService() throws IOException {
         if (connectionManager.isNetworkAvailable()) {
             if (!userServiceOptional.isPresent()) {
@@ -53,6 +59,9 @@ public class RetrofitServiceManager {
         }
     }
 
+    /**
+     * Set O-Auth token for authentication
+     */
     public void registerSession(String token) {
         authInterceptor.setToken(token);
     }

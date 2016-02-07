@@ -8,6 +8,9 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 
+/**
+ * Interceptor to add O-Auth token to request header for authentication against server
+ */
 @Singleton
 public class AuthInterceptor implements Interceptor {
     private Optional<String> tokenOptional = Optional.absent();
@@ -20,6 +23,9 @@ public class AuthInterceptor implements Interceptor {
         tokenOptional = Optional.fromNullable(token);
     }
 
+    /**
+     * Add Authorization header element to request
+     */
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
